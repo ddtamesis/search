@@ -65,7 +65,7 @@ class Index(val inputFile: String) {
           val hM : HashMap[Int, Double] = HashMap(pageID -> 1)
           wordsRelevance += (word -> hM)
         } // if page ID # not present, add to hashmap/value of existing key/word
-        if (!wordsRelevance(word).contains(pageID)){
+        else if (!wordsRelevance(word).contains(pageID)){
           wordsRelevance(word) += (pageID -> 1)
         } // increment frequency count !! problem: words only contains 1
         // copy, never reaches this. otherwise seems correct!!
