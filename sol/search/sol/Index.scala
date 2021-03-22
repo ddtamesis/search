@@ -1,9 +1,9 @@
 package search.sol
 
-import search.src.PorterStemmer.{stem}
+import search.src.PorterStemmer.stem
 import search.src.StopWords.isStopWord
 
-import scala.collection.immutable.HashMap
+import scala.collection.mutable.HashMap
 import scala.util.matching.Regex
 import scala.xml.{Node, NodeSeq}
 
@@ -36,10 +36,13 @@ class Index(val inputFile: String) {
     idTitleHm
   }
 
-  def mapRelevance: HashMap[Int, List[String]] = {
+  def mapWordsRelevance: HashMap[String, HashMap[Int, Double]] = {
     var idTermsHm: HashMap[Int, List[String]] = HashMap()
     val regexLinks = new Regex("""\[\[[^\[]+?\]\]""")
     val regexText = new Regex("""[^\W_]+'[^\W_]+|[^\W_]+""")
+
+    var wordsRelevance : HashMap[String, HashMap[Int, Double]] = HashMap()
+
     for (page <- pageSeq) {
       val matchesTextIterator = regexText.findAllMatchIn(page.text)
       val matchesTextList = matchesTextIterator.toList.map { aMatch => aMatch
@@ -52,14 +55,43 @@ class Index(val inputFile: String) {
         .matched }
 //      val refinedLinksList = matchesLinksList.map(x => dealWithLink(x))
 
-      val relevantWords = stemmedList.appendedAll(matchesLinksList)
+      val words = stemmedList.appendedAll(matchesLinksList)
       val pageID = (page \ "id").text.trim.toInt
-      idTermsHm += (pageID -> relevantWords)
+      idTermsHm += (pageID -> words)
+
+      for (word <- words) {
+        // if word not present, add mapping to HashMap for words.txt
+        if (!wordsRelevance.contains(word)) {
+          val hM : HashMap[Int, Double] = HashMap(pageID -> 1)
+          wordsRelevance += (word -> hM)
+        } // if page ID # not present, add to hashmap/value of existing key/word
+        if (!wordsRelevance(word).contains(pageID)){
+          wordsRelevance(word) += (pageID -> 1)
+        } // increment frequency count !! problem: words only contains 1
+        // copy, never reaches this. otherwise seems correct!!
+        else {
+          val incrementedFreq = wordsRelevance(word)(pageID) + 1.0
+          wordsRelevance(word)(pageID) -> incrementedFreq
+        }
+      }
     }
-    idTermsHm
+    wordsRelevance
   }
 
-//  def dealWithLink(text: String): String = text match {
+//  /**
+//   * @return the hashmap of words to a hashmap of the document Ids they appear
+//   *         in along with their frequency in that document
+//   */
+//  def mapWordsRelevance: HashMap[String, HashMap[Int, Double]] = {
+//    var wordsRelevance : HashMap[String, HashMap[Int, Double]] = HashMap()
+//    var idToFrequency = HashMap[Int, Double]
+//    for (word <- mapIDsToWords.values.toList) {
+//      if (wordsRelevance.contains(word)
+//    }
+//  }
+
+
+  //  def dealWithLink(text: String): String = text match {
 //    case Some(String) + "|" + Some(String) =>
 //      text.dropWhile(x => x.toString == "|")
 //    case "[" + Some(String) + "]" => text.dropWhile(x => x.toString == "[")
@@ -72,6 +104,6 @@ object Index {
   def main(args: Array[String]) {
     val smallWiki = new Index("src/search/src/SmallWiki.xml")
 //    System.out.println(smallWiki.makeIdTitlesHm)
-    System.out.println(smallWiki.mapRelevance)
+    System.out.println(smallWiki.mapWordsRelevance)
   }
 }
