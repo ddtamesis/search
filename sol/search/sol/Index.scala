@@ -36,6 +36,10 @@ class Index(val inputFile: String) {
     idTitleHm
   }
 
+  /**
+   * @return the hashmap of words to a hashmap of the document Ids they
+   *         appear in along with their frequency in that document
+   */
   def mapWordsRelevance: HashMap[String, HashMap[Int, Double]] = {
     var idTermsHm: HashMap[Int, List[String]] = HashMap()
     val regexLinks = new Regex("""\[\[[^\[]+?\]\]""")
@@ -48,17 +52,18 @@ class Index(val inputFile: String) {
       val matchesTextList = matchesTextIterator.toList.map { aMatch => aMatch
         .matched }
       val noStopWordsList = matchesTextList.filter(x => !isStopWord(x))
-      val stemmedList =  noStopWordsList.map(x => stem(x))
+      val stemmedList =  noStopWordsList.map(x => stem(x.toLowerCase()))
 
       val matchesLinkIterator = regexLinks.findAllMatchIn(page.text)
       val matchesLinksList = matchesLinkIterator.toList.map { aMatch => aMatch
         .matched }
-//      var refinedLinksList = matchesLinksList.map(x => dealWithLink(x))
-      var refinedLinksList = List[String]()
-      for (x <- matchesLinksList) {
-        val wordsInLink : Array[String] = dealWithLink(x)
-        refinedLinksList = refinedLinksList.appendedAll(wordsInLink)
-      }
+      //      var refinedLinksList = matchesLinksList.map(x => dealWithLink(x))
+//      var refinedLinksList = List[String]()
+//      for (x <- matchesLinksList) {
+//        val wordsInLink : Array[String] = dealWithLink(x)
+//        refinedLinksList = refinedLinksList.appendedAll(wordsInLink)
+//      }
+      val refinedLinksList = refineLinksList(matchesLinksList)
 
       val words = stemmedList.appendedAll(refinedLinksList)
       val pageID = (page \ "id").text.trim.toInt
@@ -69,20 +74,16 @@ class Index(val inputFile: String) {
     wordsRelevance
   }
 
-//  /**
-//   * @return the hashmap of words to a hashmap of the document Ids they appear
-//   *         in along with their frequency in that document
-//   */
-//  def mapWordsRelevance: HashMap[String, HashMap[Int, Double]] = {
-//    var wordsRelevance : HashMap[String, HashMap[Int, Double]] = HashMap()
-//    var idToFrequency = HashMap[Int, Double]
-//    for (word <- mapIDsToWords.values.toList) {
-//      if (wordsRelevance.contains(word)
-//    }
-//  }
-  //
+  def refineLinksList(matchesLinksList: List[String]): List[String] = {
+    var refinedLinksList = List[String]()
+    for (x <- matchesLinksList) {
+      val wordsInLink : Array[String] = dealWithLink(x)
+      refinedLinksList = refinedLinksList.appendedAll(wordsInLink)
+    }
+    refinedLinksList
+  }
 
-    def dealWithLink(text: String): Array[String] = { //  text match
+  def dealWithLink(text: String): Array[String] = { //  text match
       if (text.contains("|")){
         val newText = text.dropWhile(x => !x.toString.equals("|"))
         val split : Array[String] = newText.split("""[\w]""")
@@ -91,10 +92,6 @@ class Index(val inputFile: String) {
         val split: Array[String] = text.split("""[\w]""")
         split
       }
-//      case Some(String) + "|" + Some(String) =>
-//      text.dropWhile(x => x.toString == "|")
-//    case "[" + Some(String) + "]" => text.dropWhile(x => x.toString == "[")
-//      .takeWhile(x => x.toString != "|")
   }
 
   def wordsRelevanceHelper(pageID: Int, words : List[String],
