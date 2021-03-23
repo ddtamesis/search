@@ -91,6 +91,8 @@ class Index(val inputFile: String) {
   def wordsRelevanceHelper(pageID: Int, words : List[String],
     existingWR : HashMap[String, HashMap[Int, Double]]) : HashMap[String,
     HashMap[Int, Double]] = {
+    idToMaxFreq.put(pageID, 1.0)
+
     for (word <- words) {
       // if word not present, add mapping to HashMap for words.txt
       if (!existingWR.contains(word)) {
@@ -103,6 +105,11 @@ class Index(val inputFile: String) {
       else {
         val incrementedFreq = existingWR(word)(pageID) + 1.0
         existingWR(word).update(pageID, incrementedFreq)
+
+        if (idToMaxFreq(pageID) < incrementedFreq) {
+          idToMaxFreq(pageID) = incrementedFreq
+        }
+
       }
     }
     existingWR
