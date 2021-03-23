@@ -41,7 +41,7 @@ class Index(val inputFile: String) {
     val regexLinks = new Regex("""\[\[[^\[]+?\]\]""")
     val regexText = new Regex("""[^\W_]+'[^\W_]+|[^\W_]+""")
 
-    var wordsRelevance : HashMap[String, HashMap[Int, Double]] = HashMap()
+    var wordsRelevance: HashMap[String, HashMap[Int, Double]] = HashMap()
 
     for (page <- pageSeq) {
       val matchesTextIterator = regexText.findAllMatchIn(page.text)
@@ -53,26 +53,18 @@ class Index(val inputFile: String) {
       val matchesLinkIterator = regexLinks.findAllMatchIn(page.text)
       val matchesLinksList = matchesLinkIterator.toList.map { aMatch => aMatch
         .matched }
-//      val refinedLinksList = matchesLinksList.map(x => dealWithLink(x))
+//      var refinedLinksList = matchesLinksList.map(x => dealWithLink(x))
+      var refinedLinksList = List[String]()
+      for (x <- matchesLinksList) {
+        val wordsInLink : Array[String] = dealWithLink(x)
+        refinedLinksList = refinedLinksList.appendedAll(wordsInLink)
+      }
 
-      val words = stemmedList.appendedAll(matchesLinksList)
+      val words = stemmedList.appendedAll(refinedLinksList)
       val pageID = (page \ "id").text.trim.toInt
       idTermsHm += (pageID -> words)
 
-      for (word <- words) {
-        // if word not present, add mapping to HashMap for words.txt
-        if (!wordsRelevance.contains(word)) {
-          val hM : HashMap[Int, Double] = HashMap(pageID -> 1)
-          wordsRelevance += (word -> hM)
-        } // if page ID # not present, add to hashmap/value of existing key/word
-        else if (!wordsRelevance(word).contains(pageID)){
-          wordsRelevance(word) += (pageID -> 1)
-        } // increment frequency count
-        else {
-          val incrementedFreq = wordsRelevance(word)(pageID) + 1.0
-          wordsRelevance(word).update(pageID, incrementedFreq)
-        }
-      }
+      wordsRelevance = wordsRelevanceHelper(pageID, words, wordsRelevance)
     }
     wordsRelevance
   }
@@ -92,16 +84,37 @@ class Index(val inputFile: String) {
 
     def dealWithLink(text: String): Array[String] = { //  text match
       if (text.contains("|")){
-        text.dropWhile(x => x.toString == "|")
-      }
-        val split : Array[String] = text.split("""[\w]""")
+        val newText = text.dropWhile(x => !x.toString.equals("|"))
+        val split : Array[String] = newText.split("""[\w]""")
         split
-      // make new regex that only takes words and words after pipe |
-
+      } else {
+        val split: Array[String] = text.split("""[\w]""")
+        split
+      }
 //      case Some(String) + "|" + Some(String) =>
 //      text.dropWhile(x => x.toString == "|")
 //    case "[" + Some(String) + "]" => text.dropWhile(x => x.toString == "[")
 //      .takeWhile(x => x.toString != "|")
+  }
+
+  def wordsRelevanceHelper(pageID: Int, words : List[String],
+    existingWR : HashMap[String, HashMap[Int, Double]]) : HashMap[String,
+    HashMap[Int, Double]] = {
+    for (word <- words) {
+      // if word not present, add mapping to HashMap for words.txt
+      if (!existingWR.contains(word)) {
+        val hM: HashMap[Int, Double] = HashMap(pageID -> 1)
+        existingWR += (word -> hM)
+      } // if page ID # not present, add to hashmap/value of existing key/word
+      else if (!existingWR(word).contains(pageID)) {
+        existingWR(word) += (pageID -> 1)
+      } // increment frequency count
+      else {
+        val incrementedFreq = existingWR(word)(pageID) + 1.0
+        existingWR(word).update(pageID, incrementedFreq)
+      }
+    }
+    existingWR
   }
 }
 
