@@ -21,6 +21,7 @@ class Index(val inputFile: String) {
   val titleSeq: NodeSeq = mainNode \ "page" \ "title"
   // select all children w/ tag “id”
   val idSeq: NodeSeq = mainNode \ "page" \ "id"
+  val idToMaxFreq : HashMap[Int,Double] = HashMap()
 
   /**
    * maps IDs to Titles in a Hashmap of Ints to Strings
@@ -106,6 +107,10 @@ class Index(val inputFile: String) {
     }
     existingWR
   }
+
+//  def addMaxFreq(newFreq : Double, pageID : Int): {
+//    idToMaxFreq()
+//  }
 }
 
 object Index {
