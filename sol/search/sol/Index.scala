@@ -51,25 +51,20 @@ class Index(val inputFile: String) {
       val matchesTextIterator = regexText.findAllMatchIn(page.text)
       val matchesTextList = matchesTextIterator.toList.map { aMatch => aMatch
         .matched }
-      val noStopWordsList = matchesTextList.filter(x => !isStopWord(x))
-      val stemmedList =  noStopWordsList.map(x => stem(x.toLowerCase()))
 
       val matchesLinkIterator = regexLinks.findAllMatchIn(page.text)
       val matchesLinksList = matchesLinkIterator.toList.map { aMatch => aMatch
         .matched }
-      //      var refinedLinksList = matchesLinksList.map(x => dealWithLink(x))
-//      var refinedLinksList = List[String]()
-//      for (x <- matchesLinksList) {
-//        val wordsInLink : Array[String] = dealWithLink(x)
-//        refinedLinksList = refinedLinksList.appendedAll(wordsInLink)
-//      }
       val refinedLinksList = refineLinksList(matchesLinksList)
 
-      val words = stemmedList.appendedAll(refinedLinksList)
-      val pageID = (page \ "id").text.trim.toInt
-      idTermsHm += (pageID -> words)
+      val words = matchesTextList.appendedAll(refinedLinksList)
+      val noStopWordsList = words.filter(x => !isStopWord(x))
+      val finalStemmedList =  noStopWordsList.map(x => stem(x.toLowerCase()))
 
-      wordsRelevance = wordsRelevanceHelper(pageID, words, wordsRelevance)
+      val pageID = (page \ "id").text.trim.toInt
+      idTermsHm += (pageID -> finalStemmedList)
+
+      wordsRelevance = wordsRelevanceHelper(pageID, finalStemmedList, wordsRelevance)
     }
     wordsRelevance
   }
