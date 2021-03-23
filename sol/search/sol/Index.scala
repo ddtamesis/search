@@ -67,11 +67,10 @@ class Index(val inputFile: String) {
         } // if page ID # not present, add to hashmap/value of existing key/word
         else if (!wordsRelevance(word).contains(pageID)){
           wordsRelevance(word) += (pageID -> 1)
-        } // increment frequency count !! problem: words only contains 1
-        // copy, never reaches this. otherwise seems correct!!
+        } // increment frequency count
         else {
           val incrementedFreq = wordsRelevance(word)(pageID) + 1.0
-          wordsRelevance(word)(pageID) -> incrementedFreq
+          wordsRelevance(word).update(pageID, incrementedFreq)
         }
       }
     }
@@ -89,15 +88,21 @@ class Index(val inputFile: String) {
 //      if (wordsRelevance.contains(word)
 //    }
 //  }
+  //
 
+    def dealWithLink(text: String): Array[String] = { //  text match
+      if (text.contains("|")){
+        text.dropWhile(x => x.toString == "|")
+      }
+        val split : Array[String] = text.split("""[\w]""")
+        split
+      // make new regex that only takes words and words after pipe |
 
-  //  def dealWithLink(text: String): String = text match {
-//    case Some(String) + "|" + Some(String) =>
+//      case Some(String) + "|" + Some(String) =>
 //      text.dropWhile(x => x.toString == "|")
 //    case "[" + Some(String) + "]" => text.dropWhile(x => x.toString == "[")
 //      .takeWhile(x => x.toString != "|")
-//  }
-
+  }
 }
 
 object Index {
