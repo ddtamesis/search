@@ -21,7 +21,17 @@ class Index(val inputFile: String) {
   val titleSeq: NodeSeq = mainNode \ "page" \ "title"
   // select all children w/ tag “id”
   val idSeq: NodeSeq = mainNode \ "page" \ "id"
-  val idToMaxFreq : HashMap[Int,Double] = HashMap()
+  val idToMaxFreq: HashMap[Int, Double] = HashMap()
+  val idToNumLinks: HashMap[Int, Int] = HashMap()
+  val idToPagesThatLinkToIt: HashMap[Int, List[Int]] = HashMap()
+
+  /*
+  when creating hashmap, idToPagesThatLinkToIt, should we create a hashmap of
+  title -> id to quickly look up ids of titles in uniqueLinks list & add ids
+  to list value in idToPagesThatLinkToIt?
+
+  how much should we be thinking about space/time efficiency tradeoffs?
+   */
 
   /**
    * maps IDs to Titles in a Hashmap of Ints to Strings
@@ -64,6 +74,9 @@ class Index(val inputFile: String) {
       val pageID = (page \ "id").text.trim.toInt
 
       wordsRelevance = wordsRelevanceHelper(pageID, finalStemmedList, wordsRelevance)
+
+      idToNumLinks.put(pageID, calcUniqueLinks(matchesLinksList))
+
     }
     wordsRelevance
   }
@@ -88,8 +101,8 @@ class Index(val inputFile: String) {
       }
   }
 
-  def wordsRelevanceHelper(pageID: Int, words : List[String],
-    existingWR : HashMap[String, HashMap[Int, Double]]) : HashMap[String,
+  def wordsRelevanceHelper(pageID: Int, words: List[String],
+    existingWR: HashMap[String, HashMap[Int, Double]]): HashMap[String,
     HashMap[Int, Double]] = {
     idToMaxFreq.put(pageID, 1.0)
 
@@ -115,9 +128,32 @@ class Index(val inputFile: String) {
     existingWR
   }
 
-//  def addMaxFreq(newFreq : Double, pageID : Int): {
-//    idToMaxFreq()
-//  }
+  def calcUniqueLinks(listOfLinks: List[String]): Int = {
+    var uniqueLinks: List[String] = List()
+
+    for (link <- listOfLinks) {
+      var linkToCheck = link.dropWhile(x => x.toString.equals("["))
+      linkToCheck = linkToCheck.takeWhile(x => !x.toString.equals("]"))
+      if (link.contains("|")){
+        linkToCheck = link.takeWhile(x => !x.toString.equals("|"))
+      }
+      if (!uniqueLinks.contains(linkToCheck)) {
+        uniqueLinks += linkToCheck
+      }
+    }
+    uniqueLinks.size
+  }
+
+  def findId(title: String): Int = {
+    val idToTitles = makeIdTitlesHm
+
+  }
+
+  def calcWeight(pageID: Int): Double = {
+    val numLinkedPages = idToNumLinks(pageID)
+    if ()
+  }
+
 }
 
 object Index {
