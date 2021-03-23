@@ -41,7 +41,6 @@ class Index(val inputFile: String) {
    *         appear in along with their frequency in that document
    */
   def mapWordsRelevance: HashMap[String, HashMap[Int, Double]] = {
-    var idTermsHm: HashMap[Int, List[String]] = HashMap()
     val regexLinks = new Regex("""\[\[[^\[]+?\]\]""")
     val regexText = new Regex("""[^\W_]+'[^\W_]+|[^\W_]+""")
 
@@ -62,7 +61,6 @@ class Index(val inputFile: String) {
       val finalStemmedList =  noStopWordsList.map(x => stem(x.toLowerCase()))
 
       val pageID = (page \ "id").text.trim.toInt
-      idTermsHm += (pageID -> finalStemmedList)
 
       wordsRelevance = wordsRelevanceHelper(pageID, finalStemmedList, wordsRelevance)
     }
