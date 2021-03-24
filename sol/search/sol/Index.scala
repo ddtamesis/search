@@ -75,7 +75,7 @@ class Index(val inputFile: String) {
 
       wordsRelevance = wordsRelevanceHelper(pageID, finalStemmedList, wordsRelevance)
 
-      idToNumLinks.put(pageID, calcUniqueLinks(matchesLinksList))
+      //idToNumLinks.put(pageID, calcUniqueLinks(matchesLinksList))
 
     }
     wordsRelevance
@@ -100,6 +100,10 @@ class Index(val inputFile: String) {
         split
       }
   }
+
+  /*
+  just check first two characters [[ charat
+   */
 
   def wordsRelevanceHelper(pageID: Int, words: List[String],
     existingWR: HashMap[String, HashMap[Int, Double]]): HashMap[String,
@@ -127,7 +131,7 @@ class Index(val inputFile: String) {
     }
     existingWR
   }
-
+/*
   def calcUniqueLinks(listOfLinks: List[String]): Int = {
     var uniqueLinks: List[String] = List()
 
@@ -142,8 +146,8 @@ class Index(val inputFile: String) {
       }
     }
     uniqueLinks.size
-  }
-
+  }*/
+/*
   def findId(title: String): Int = {
     val idToTitles = makeIdTitlesHm
 
@@ -153,7 +157,7 @@ class Index(val inputFile: String) {
     val numLinkedPages = idToNumLinks(pageID)
     if ()
   }
-
+*/
 }
 
 object Index {
