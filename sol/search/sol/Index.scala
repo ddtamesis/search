@@ -4,6 +4,7 @@ import search.src.PorterStemmer.stem
 import search.src.StopWords.isStopWord
 
 import scala.collection.mutable.HashMap
+import scala.math
 import scala.util.matching.Regex
 import scala.xml.{Node, NodeSeq}
 
@@ -22,19 +23,22 @@ class Index(val inputFile: String) {
   // select all children w/ tag “id”
   private val idSeq: NodeSeq = mainNode \ "page" \ "id"
 
+  val IDArray = idSeq.map(x => x.text.trim.toInt).toArray
+
   private val idsToTitles = new HashMap[Int, String]
   private val titlesToId = new HashMap[String, Int]
-  private val wordsToDocumentFrequencies = this.mapWordsRelevance
+  this.makeIdTitlesHm
+
   private val idToMaxCounts = new HashMap[Int, Double]
   private val idsToLinks = new HashMap[Int, Set[Int]]
   private val idsToPageRanks = new HashMap[Int, Double]
+  private val wordsToDocumentFrequencies = this.mapWordsRelevance
 
   /**
    * adds IDs to Titles in idsToTitles Hashmap of Ints to Strings
    * adds Titles to IDs in idsToTitles Hashmap of Strings to Ints
    */
   def makeIdTitlesHm: Unit = {
-    val IDArray = idSeq.map(x => x.text.trim.toInt).toArray
     val titleArray = titleSeq.map(x => x.text.trim).toArray
     for (i <- IDArray.indices) {
       idsToTitles.put(IDArray(i), titleArray(i))
@@ -42,6 +46,10 @@ class Index(val inputFile: String) {
     }
   }
 
+
+  /*
+  reconfigure as loop through pages to build hashmaps
+   */
   /**
    * @return the hashmap of words to a hashmap of the document Ids they
    *         appear in along with their frequency in that document
@@ -88,10 +96,10 @@ class Index(val inputFile: String) {
   def dealWithLink(text: String): Array[String] = { //  text match
       if (text.contains("|")){
         val newText = text.dropWhile(x => !x.toString.equals("|"))
-        val split : Array[String] = newText.split("""[\w]""")
+        val split : Array[String] = newText.split("""[\W]""")
         split
       } else {
-        val split: Array[String] = text.split("""[\w]""")
+        val split: Array[String] = text.split("""[\W]""")
         split
       }
   }
@@ -135,41 +143,76 @@ class Index(val inputFile: String) {
       if (link.contains("|")){
         linkTitle = link.takeWhile(x => !x.toString.equals("|"))
       }
-      setOfIds += titlesToId(linkTitle)
+      if (titlesToId.contains(linkTitle)) {
+        setOfIds += titlesToId(linkTitle)
+      }
     }
     setOfIds
   }
 
   def calcWeight(jPageID: Int, kPageID: Int): Double = {
     val n = idsToLinks.size
-    val nk = idsToLinks(kPageID).size
+    var nk = idsToLinks(kPageID).size
+    if (nk == 0) {
+      nk = n - 1
+    }
+
     val epsilon = 0.15
-    if (idsToLinks(kPageID).contains(jPageID)) {
+    if (idsToLinks(jPageID).contains(kPageID)) {
       epsilon/n + (1 - epsilon)/nk
     } else {
       epsilon/n
     }
   }
 
-  def calcPageRank(jPageID: Int): Unit = {
-    val setOfKs = idsToLinks(jPageID)
-    val weights = new HashMap[Int, Double]
-    for (k <- setOfKs) {
-      weights.put(k, calcWeight(jPageID, k))
+  def calcPageRank: Unit = {
+    val n = pageSeq.size
+
+    val pageWeights = new Array[Array[Double]](n)
+    for (jPageID <- IDArray) {
+      val weights = new Array[Double](n)
+      for (kPageID <- IDArray) {
+        weights :+ calcWeight(jPageID, kPageID)
+      }
+      pageWeights :+ weights
     }
-    val n = idsToLinks.size
-    val r = Array.fill[Double](n)(0)
-    val currRanking = Array.fill[Double](idsToLinks.size)
-//    for (i <- currRanking) {
-//      1/n
-//    }
+
+    val ranking = Array.fill[Double](n)(0)
+    val updatedRanking = Array.fill[Double](n)(1/n)
+
+    var sumOfDistances = 1.0
+
+    while (sumOfDistances > 0.001) {
+      for (i <- ranking.indices) {
+        ranking(i) = updatedRanking(i)
+      }
+      for (j <- pageWeights.indices) {
+        updatedRanking(j) = 0.0
+        for (k <- 0 to n - 1) {
+          updatedRanking(j) += (pageWeights(j)(k) * ranking(k))
+        }
+      }
+
+      for (i <- updatedRanking.indices) {
+        val distancei = math.pow(updatedRanking(i) - ranking(i), 2)
+        sumOfDistances += distancei
+      }
+      sumOfDistances = math.sqrt(sumOfDistances)
+    }
+
+    for (i <- updatedRanking.indices) {
+      idsToPageRanks.put(IDArray(i), updatedRanking(i))
+    }
   }
 }
+
+
 
 object Index {
   def main(args: Array[String]) {
     val smallWiki = new Index("src/search/src/SmallWiki.xml")
 //    System.out.println(smallWiki.makeIdTitlesHm)
     System.out.println(smallWiki.mapWordsRelevance)
+
   }
 }
