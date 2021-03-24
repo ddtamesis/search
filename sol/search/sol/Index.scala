@@ -14,37 +14,32 @@ import scala.xml.{Node, NodeSeq}
  */
 class Index(val inputFile: String) {
   // access the main XML node
-  val mainNode: Node = xml.XML.loadFile(inputFile)
+  private val mainNode: Node = xml.XML.loadFile(inputFile)
   // select all children w/ tag “page”
-  val pageSeq: NodeSeq = mainNode \ "page"
+  private val pageSeq: NodeSeq = mainNode \ "page"
   // select all children w/ tag “title”
-  val titleSeq: NodeSeq = mainNode \ "page" \ "title"
+  private val titleSeq: NodeSeq = mainNode \ "page" \ "title"
   // select all children w/ tag “id”
-  val idSeq: NodeSeq = mainNode \ "page" \ "id"
-  val idToMaxFreq: HashMap[Int, Double] = HashMap()
-  val idToNumLinks: HashMap[Int, Int] = HashMap()
-  val idToPagesThatLinkToIt: HashMap[Int, List[Int]] = HashMap()
+  private val idSeq: NodeSeq = mainNode \ "page" \ "id"
 
-  /*
-  when creating hashmap, idToPagesThatLinkToIt, should we create a hashmap of
-  title -> id to quickly look up ids of titles in uniqueLinks list & add ids
-  to list value in idToPagesThatLinkToIt?
-
-  how much should we be thinking about space/time efficiency tradeoffs?
-   */
+  private val idsToTitles = new HashMap[Int, String]
+  private val titlesToId = new HashMap[String, Int]
+  private val wordsToDocumentFrequencies = this.mapWordsRelevance
+  private val idToMaxCounts = new HashMap[Int, Double]
+  private val idsToLinks = new HashMap[Int, Set[Int]]
+  private val idsToPageRanks = new HashMap[Int, Double]
 
   /**
-   * maps IDs to Titles in a Hashmap of Ints to Strings
-   * @return Hashmap of IDs to Titles
+   * adds IDs to Titles in idsToTitles Hashmap of Ints to Strings
+   * adds Titles to IDs in idsToTitles Hashmap of Strings to Ints
    */
-  def makeIdTitlesHm: HashMap[Int,String] = {
+  def makeIdTitlesHm: Unit = {
     val IDArray = idSeq.map(x => x.text.trim.toInt).toArray
     val titleArray = titleSeq.map(x => x.text.trim).toArray
-    var idTitleHm: HashMap[Int, String] = HashMap()
     for (i <- IDArray.indices) {
-      idTitleHm += (IDArray(i) -> titleArray(i))
+      idsToTitles.put(IDArray(i), titleArray(i))
+      titlesToId.put(titleArray(i), IDArray(i))
     }
-    idTitleHm
   }
 
   /**
@@ -55,7 +50,7 @@ class Index(val inputFile: String) {
     val regexLinks = new Regex("""\[\[[^\[]+?\]\]""")
     val regexText = new Regex("""[^\W_]+'[^\W_]+|[^\W_]+""")
 
-    var wordsRelevance: HashMap[String, HashMap[Int, Double]] = HashMap()
+    var wordsRelevance = new HashMap[String, HashMap[Int, Double]]
 
     for (page <- pageSeq) {
       val matchesTextIterator = regexText.findAllMatchIn(page.text)
@@ -75,7 +70,7 @@ class Index(val inputFile: String) {
 
       wordsRelevance = wordsRelevanceHelper(pageID, finalStemmedList, wordsRelevance)
 
-      //idToNumLinks.put(pageID, calcUniqueLinks(matchesLinksList))
+      idsToLinks.put(pageID, findIdSet(matchesLinksList))
 
     }
     wordsRelevance
@@ -108,7 +103,7 @@ class Index(val inputFile: String) {
   def wordsRelevanceHelper(pageID: Int, words: List[String],
     existingWR: HashMap[String, HashMap[Int, Double]]): HashMap[String,
     HashMap[Int, Double]] = {
-    idToMaxFreq.put(pageID, 1.0)
+    idToMaxCounts.put(pageID, 1.0)
 
     for (word <- words) {
       // if word not present, add mapping to HashMap for words.txt
@@ -123,41 +118,52 @@ class Index(val inputFile: String) {
         val incrementedFreq = existingWR(word)(pageID) + 1.0
         existingWR(word).update(pageID, incrementedFreq)
 
-        if (idToMaxFreq(pageID) < incrementedFreq) {
-          idToMaxFreq(pageID) = incrementedFreq
+        if (idToMaxCounts(pageID) < incrementedFreq) {
+          idToMaxCounts(pageID) = incrementedFreq
         }
-
       }
     }
     existingWR
   }
-/*
-  def calcUniqueLinks(listOfLinks: List[String]): Int = {
-    var uniqueLinks: List[String] = List()
+
+  def findIdSet(listOfLinks: List[String]): Set[Int] = {
+    var setOfIds: Set[Int] = Set()
 
     for (link <- listOfLinks) {
-      var linkToCheck = link.dropWhile(x => x.toString.equals("["))
-      linkToCheck = linkToCheck.takeWhile(x => !x.toString.equals("]"))
+      var linkTitle = link.dropWhile(x => x.toString.equals("["))
+      linkTitle = linkTitle.takeWhile(x => !x.toString.equals("]"))
       if (link.contains("|")){
-        linkToCheck = link.takeWhile(x => !x.toString.equals("|"))
+        linkTitle = link.takeWhile(x => !x.toString.equals("|"))
       }
-      if (!uniqueLinks.contains(linkToCheck)) {
-        uniqueLinks += linkToCheck
-      }
+      setOfIds += titlesToId(linkTitle)
     }
-    uniqueLinks.size
-  }*/
-/*
-  def findId(title: String): Int = {
-    val idToTitles = makeIdTitlesHm
-
+    setOfIds
   }
 
-  def calcWeight(pageID: Int): Double = {
-    val numLinkedPages = idToNumLinks(pageID)
-    if ()
+  def calcWeight(jPageID: Int, kPageID: Int): Double = {
+    val n = idsToLinks.size
+    val nk = idsToLinks(kPageID).size
+    val epsilon = 0.15
+    if (idsToLinks(kPageID).contains(jPageID)) {
+      epsilon/n + (1 - epsilon)/nk
+    } else {
+      epsilon/n
+    }
   }
-*/
+
+  def calcPageRank(jPageID: Int): Unit = {
+    val setOfKs = idsToLinks(jPageID)
+    val weights = new HashMap[Int, Double]
+    for (k <- setOfKs) {
+      weights.put(k, calcWeight(jPageID, k))
+    }
+    val n = idsToLinks.size
+    val r = Array.fill[Double](n)(0)
+    val currRanking = Array.fill[Double](idsToLinks.size)
+//    for (i <- currRanking) {
+//      1/n
+//    }
+  }
 }
 
 object Index {
