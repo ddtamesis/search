@@ -29,22 +29,15 @@ class Index(val inputFile: String) {
 //  this.makeIdTitlesHm
 
   private val idToMaxCounts = new HashMap[Int, Double]
+  private var matchesLinksList = List[String]()
   private val idsToLinks = new HashMap[Int, Set[Int]]
   private val idsToPageRanks = new HashMap[Int, Double]
   private val wordsToDocumentFrequencies = this.mapWordsRelevance
 
-//  /**
-//   * adds IDs to Titles in idsToTitles Hashmap of Ints to Strings
-//   * adds Titles to IDs in idsToTitles Hashmap of Strings to Ints
-//   */
-//  def makeIdTitlesHm: Unit = {
-//    val titleArray = titleSeq.map(x => x.text.trim).toArray
-//    for (i <- IDArray.indices) {
-//      idsToTitles.put(IDArray(i), titleArray(i))
-//      titlesToId.put(titleArray(i), IDArray(i))
-//    }
-//  }
-
+  /**
+   * Maps page IDs to their Titles (Ints to Strings)
+   * @return HashMap of files' IDs to Titles
+   */
   def makeIdsToTitlesHm: HashMap[Int, String] = {
     val titleArray = titleSeq.map(x => x.text.trim).toArray
     for (i <- IDArray.indices) {
@@ -53,12 +46,28 @@ class Index(val inputFile: String) {
     idsToTitles
   }
 
+  /**
+   * Maps page Titles to thier IDs (Strings to Ints)
+   * @return Hashmap of files' Titles to IDs
+   */
   def makeTitlesToIdsHm: HashMap[String, Int] = {
     val titleArray = titleSeq.map(x => x.text.trim).toArray
     for (i <- titleArray.indices) {
       titlesToId.put(titleArray(i), IDArray(i))
     }
     titlesToId
+  }
+
+  /**
+   * Maps page IDs to a set of all page IDs linked to by that page
+   * @return
+   */
+  def makeIDsToLinksHm(): HashMap[Int, Set[Int]] = {
+    for (page <- pageSeq) {
+      val pageID = (page \ "id").text.trim.toInt
+      idsToLinks.put(pageID, findIdSet(matchesLinksList))
+    }
+    idsToLinks
   }
 
   /*
@@ -80,7 +89,7 @@ class Index(val inputFile: String) {
         .matched }
 
       val matchesLinkIterator = regexLinks.findAllMatchIn(page.text)
-      val matchesLinksList = matchesLinkIterator.toList.map { aMatch => aMatch
+      matchesLinksList = matchesLinkIterator.toList.map { aMatch => aMatch
         .matched }
       val refinedLinksList = refineLinksList(matchesLinksList)
 
@@ -89,15 +98,16 @@ class Index(val inputFile: String) {
       val finalStemmedList =  noStopWordsList.map(x => stem(x.toLowerCase()))
 
       val pageID = (page \ "id").text.trim.toInt
-
       wordsRelevance = wordsRelevanceHelper(pageID, finalStemmedList, wordsRelevance)
-
-      idsToLinks.put(pageID, findIdSet(matchesLinksList))
-
     }
     wordsRelevance
   }
 
+  /**
+   * Loops through each link in the matchesLinksList and
+   * @param matchesLinksList
+   * @return List of Links
+   */
   def refineLinksList(matchesLinksList: List[String]): List[String] = {
     var refinedLinksList = List[String]()
     for (x <- matchesLinksList) {
@@ -107,6 +117,11 @@ class Index(val inputFile: String) {
     refinedLinksList
   }
 
+  /**
+   *
+   * @param text
+   * @return
+   */
   def dealWithLink(text: String): Array[String] = { //  text match
       if (text.contains("|")){
         val newText = text.dropWhile(x => !x.toString.equals("|"))
@@ -219,9 +234,9 @@ class Index(val inputFile: String) {
 
 object Index {
   def main(args: Array[String]) {
-//    val smallWiki = new Index("src/search/src/SmallWiki.xml")
+    val smallWiki = new Index("src/search/src/SmallWiki.xml")
 //    System.out.println(smallWiki.makeIdTitlesHm)
-//    System.out.println(smallWiki.mapWordsRelevance)
+    System.out.println(smallWiki.mapWordsRelevance)
 
   }
 }
