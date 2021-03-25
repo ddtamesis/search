@@ -2,7 +2,6 @@ package search.sol
 
 import search.src.PorterStemmer.stem
 import search.src.StopWords.isStopWord
-import tester.Tester
 
 import scala.collection.mutable.{HashMap, ListBuffer, Set}
 import scala.util.matching.Regex
@@ -268,30 +267,28 @@ class Index(val inputFile: String) {
     }
   }
 
-  def getWordsToDocFreq: HashMap[String, HashMap[Int,
-    Double]] = { // should we make this hashmap immutable to prevent outside
-    // changes?
-    this.wordsToDocumentFrequencies
+  def getWordsToDocFreq: HashMap[String, HashMap[Int, Double]] = {
+    this.wordsToDocumentFrequencies.clone()
   }
 
   def getIdsToMaxCounts: HashMap[Int, Double] = {
-    this.idsToMaxCounts
+    this.idsToMaxCounts.clone()
   }
 
   def getIdsToTitles: HashMap[Int, String] = {
-    this.idsToTitles
+    this.idsToTitles.clone()
   }
 
   def getTitlesToId: HashMap[String, Int] = {
-    this.titlesToId
+    this.titlesToId.clone()
   }
 
   def getIdsToLinks: HashMap[Int, Set[Int]] = {
-    this.idsToLinks
+    this.idsToLinks.clone()
   }
 
   def getIdsToPageRanks: HashMap[Int, Double] = {
-    this.idsToPageRanks
+    this.idsToPageRanks.clone()
   }
 }
 

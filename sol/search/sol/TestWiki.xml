@@ -1,6 +1,6 @@
 <xml>
     <page>
-        <title> Page0 </title>
+        <title> Category:Page0 </title>
         <id> 0 </id>
         <body>
             [[Page1|This Is Page1]]
@@ -41,10 +41,41 @@
     </page>
 
     for testing:
-    val orangeHm1 = new Hashmap(1 -> 3.0)
-    val orangeHm2 = new Hashmap(2 -> 2.0)
-    val expectedWordsFreq = new Hashmap[String, Hash
-    put(orange, orangeHm1)
-    put(banana, 1.0)
-    put(cereal, 1.0)
+    val expectedWordsFreq = new Hashmap[String, HashMap[Int, Double]]
+
+    val orangeHm = new HashMap[Int, Double]]
+    orangeHm.put(1, 3.0)
+    orangeHm.put(2, 2.0)
+
+    val bananaHm = new HashMap[Int, Double]]
+    bananaHm1.put(1, 1.0)
+    bananaHm1.put(3, 3.0)
+
+    val cerealHm = new HashMap[Int, Double]]
+    cerealHm.put(1, 1.0)
+
+    val page0Hm = new HashMap[Int, Double]]
+    page0Hm.put(0, 1.0)
+
+    val page1Hm = new HashMap[Int, Double]]
+    page1Hm.put(0, 1.0)
+
+    val page2Hm = new HashMap[Int, Double]]
+    page2Hm.put(0, 1.0)
+
+    val page3Hm = new HashMap[Int, Double]]
+    page3Hm.put(0, 1.0)
+
+    expectedWordsFreq.put("orange", orangeHm)
+    expectedWordsFreq.put("banana", bananaHm)
+    expectedWordsFreq.put("cereal", cerealHm)
+    expectedWordsFreq.put("Page0", page0Hm)
+    expectedWordsFreq.put("Page1", page1Hm)
+    expectedWordsFreq.put("Page2", page2Hm)
+    expectedWordsFreq.put("Page3", page3Hm)
+    expectedWordsFreq.put(Category, categoryHm)
+    expectedWordsFreq.put("0", hm0)
+    expectedWordsFreq.put("1", hm1)
+    expectedWordsFreq.put("2", hm2)
+    expectedWordsFreq.put("3", hm3)
 </xml>

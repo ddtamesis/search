@@ -14,17 +14,17 @@ object IndexTestSuite {
     */
   def testBuildTitleIdMaps(t: Tester): Unit = {
     val expectedIdsToTitles = new HashMap[Int, String]
-    expectedIdsToTitles.put(0, "PageA")
-    expectedIdsToTitles.put(1, "PageB")
-    expectedIdsToTitles.put(2, "PageC")
-    expectedIdsToTitles.put(3, "PageD")
+    expectedIdsToTitles.put(0, "Category:Page0")
+    expectedIdsToTitles.put(1, "Page1")
+    expectedIdsToTitles.put(2, "Page2")
+    expectedIdsToTitles.put(3, "Page3")
     t.checkExpect(testIndex.getIdsToTitles, expectedIdsToTitles)
 
     val expectedTitlesToId = new HashMap[String, Int]
-    expectedTitlesToId.put("PageA", 0)
-    expectedTitlesToId.put( "PageB", 1)
-    expectedTitlesToId.put("PageC", 2)
-    expectedTitlesToId.put("PageD", 3)
+    expectedTitlesToId.put("Category:Page0", 0)
+    expectedTitlesToId.put("Page1", 1)
+    expectedTitlesToId.put("Page2", 2)
+    expectedTitlesToId.put("Page3", 3)
     t.checkExpect(testIndex.getTitlesToId, expectedTitlesToId)
   }
 
@@ -33,6 +33,11 @@ object IndexTestSuite {
       Double]]
 
     val expectedIdsToMaxCounts = new HashMap[Int, Double]
+    expectedIdsToMaxCounts.put(0, 1.0)
+    expectedIdsToMaxCounts.put(1, 3.0)
+    expectedIdsToMaxCounts.put(2, 2.0)
+    expectedIdsToMaxCounts.put(3, 3.0)
+    t.checkExpect(testIndex.getIdsToMaxCounts, expectedIdsToMaxCounts)
 
     val expectedIdsToLinks = new HashMap[Int, Set[Int]]
     val aLinks: Set[Int] = Set()
@@ -50,11 +55,11 @@ object IndexTestSuite {
     expectedIdsToLinks.put(1, bLinks)
     expectedIdsToLinks.put(2, cLinks)
     expectedIdsToLinks.put(3, dLinks)
-    t.checkExpect(testIndex.getTitlesToId, expectedIdsToLinks)
+    t.checkExpect(testIndex.getIdsToLinks, expectedIdsToLinks)
   }
 
   // test PageRank
-  System.out.println(testIndex.getIdsToPageRanks)
+//  System.out.println(testIndex.getIdsToPageRanks)
 
   /*
   val pageDocFreq = new HashMap[Int, Double]
