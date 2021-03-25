@@ -4,7 +4,6 @@ import search.src.PorterStemmer.stem
 import search.src.StopWords.isStopWord
 
 import scala.collection.mutable.HashMap
-import scala.math
 import scala.util.matching.Regex
 import scala.xml.{Node, NodeSeq}
 
@@ -23,29 +22,44 @@ class Index(val inputFile: String) {
   // select all children w/ tag “id”
   private val idSeq: NodeSeq = mainNode \ "page" \ "id"
 
-  val IDArray = idSeq.map(x => x.text.trim.toInt).toArray
+  private val IDArray = idSeq.map(x => x.text.trim.toInt).toArray
 
   private val idsToTitles = new HashMap[Int, String]
   private val titlesToId = new HashMap[String, Int]
-  this.makeIdTitlesHm
+//  this.makeIdTitlesHm
 
   private val idToMaxCounts = new HashMap[Int, Double]
   private val idsToLinks = new HashMap[Int, Set[Int]]
   private val idsToPageRanks = new HashMap[Int, Double]
   private val wordsToDocumentFrequencies = this.mapWordsRelevance
 
-  /**
-   * adds IDs to Titles in idsToTitles Hashmap of Ints to Strings
-   * adds Titles to IDs in idsToTitles Hashmap of Strings to Ints
-   */
-  def makeIdTitlesHm: Unit = {
+//  /**
+//   * adds IDs to Titles in idsToTitles Hashmap of Ints to Strings
+//   * adds Titles to IDs in idsToTitles Hashmap of Strings to Ints
+//   */
+//  def makeIdTitlesHm: Unit = {
+//    val titleArray = titleSeq.map(x => x.text.trim).toArray
+//    for (i <- IDArray.indices) {
+//      idsToTitles.put(IDArray(i), titleArray(i))
+//      titlesToId.put(titleArray(i), IDArray(i))
+//    }
+//  }
+
+  def makeIdsToTitlesHm: HashMap[Int, String] = {
     val titleArray = titleSeq.map(x => x.text.trim).toArray
     for (i <- IDArray.indices) {
       idsToTitles.put(IDArray(i), titleArray(i))
-      titlesToId.put(titleArray(i), IDArray(i))
     }
+    idsToTitles
   }
 
+  def makeTitlesToIdsHm: HashMap[String, Int] = {
+    val titleArray = titleSeq.map(x => x.text.trim).toArray
+    for (i <- titleArray.indices) {
+      titlesToId.put(titleArray(i), IDArray(i))
+    }
+    titlesToId
+  }
 
   /*
   reconfigure as loop through pages to build hashmaps
@@ -104,10 +118,6 @@ class Index(val inputFile: String) {
       }
   }
 
-  /*
-  just check first two characters [[ charat
-   */
-
   def wordsRelevanceHelper(pageID: Int, words: List[String],
     existingWR: HashMap[String, HashMap[Int, Double]]): HashMap[String,
     HashMap[Int, Double]] = {
@@ -165,7 +175,7 @@ class Index(val inputFile: String) {
     }
   }
 
-  def calcPageRank: Unit = {
+  def calcPageRank: HashMap[Int, Double] = {
     val n = pageSeq.size
 
     val pageWeights = new Array[Array[Double]](n)
@@ -203,16 +213,15 @@ class Index(val inputFile: String) {
     for (i <- updatedRanking.indices) {
       idsToPageRanks.put(IDArray(i), updatedRanking(i))
     }
+    idsToPageRanks
   }
 }
 
-
-
 object Index {
   def main(args: Array[String]) {
-    val smallWiki = new Index("src/search/src/SmallWiki.xml")
+//    val smallWiki = new Index("src/search/src/SmallWiki.xml")
 //    System.out.println(smallWiki.makeIdTitlesHm)
-    System.out.println(smallWiki.mapWordsRelevance)
+//    System.out.println(smallWiki.mapWordsRelevance)
 
   }
 }

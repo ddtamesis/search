@@ -1,0 +1,40 @@
+<xml>
+    <page>
+        <title> PageA </title>
+        <id> 0 </id>
+        <body>
+            [[PageB|This Is Page B]]
+            [[PageC]]
+            [[PageD]]
+            [[PageD]]
+        </body>
+    </page>
+
+    <page>
+        <title> PageB </title>
+        <id> 1 </id>
+        <body>
+            This is the body text! I don't link to anything!
+        </body>
+    </page>
+
+    <page>
+        <title> PageC </title>
+        <id> 2 </id>
+        <body>
+            [[Category:PageA]]
+            [[PageD]]
+        </body>
+    </page>
+
+    <page>
+        <title> PageD </title>
+        <id> 3 </id>
+        <body>
+            This is the body text!
+            [[Category:PageA]]
+        </body>
+    </page>
+
+
+</xml>
