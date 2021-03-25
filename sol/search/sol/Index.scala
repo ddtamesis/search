@@ -34,8 +34,8 @@ class Index(val inputFile: String) {
   private val idsToLinks = new HashMap[Int, Set[Int]]
   private val idsToPageRanks = new HashMap[Int, Double]
 
-  this.buildWordsLinksMaps
   this.buildTitleIdMaps
+  this.buildWordsLinksMaps
   this.buildIdsToPageRanks
 
   // make getters, no FileIO
@@ -55,7 +55,7 @@ class Index(val inputFile: String) {
     * Maps page IDs to their Titles (Ints to Strings)
     * and Titles to their IDs (Strings to Ints)
     */
-  def buildTitleIdMaps: Unit = {
+  private def buildTitleIdMaps: Unit = {
     val titleArray = titleSeq.map(x => x.text.trim).toArray
     for (i <- IDArray.indices) {
       idsToTitles.put(IDArray(i), titleArray(i))
@@ -68,34 +68,59 @@ class Index(val inputFile: String) {
     * and page IDs to max word frequencies (idToMaxCounts)
     * and page IDs to a set of all page IDs linked to by that page (idsToLinks)
     */
-  def buildWordsLinksMaps: Unit = {
-    val regexLink = new Regex("""\[\[[^\[]+?\]\]""")
-    val regexText = new Regex("""[^\W_]+'[^\W_]+|[^\W_]+""")
+  private def buildWordsLinksMaps: Unit = {
+    val regex = new Regex("""\[\[[^\[]+?\]\]|[^\W_]+'[^\W_]+|[^\W_]+""")
 
     for (page <- pageSeq) {
-      val matchesTextIterator = regexText.findAllMatchIn(page.text)
-      val matchesTextList = matchesTextIterator.toList.map { aMatch => aMatch
-        .matched }
+      val matchesIterator = regex.findAllMatchIn(page.text)
 
-      val matchesLinkIterator = regexLink.findAllMatchIn(page.text)
-      val matchesLinksList = matchesLinkIterator.toList.map { aMatch => aMatch
-        .matched }
-      val refinedLinksList = refineLinks(matchesLinksList)
+      val matchesList = matchesIterator.toList.map { aMatch => aMatch.matched }
 
-      val words = matchesTextList.appendedAll(refinedLinksList)
-      val noStopWordsList = words.filter(x => !isStopWord(x))
-      val finalStemmedList =  noStopWordsList.map(x => stem(x.toLowerCase()))
+      var refinedTextList: List[String] = matchesList.map(word =>
+        if (isLink(word)) {
+          refineLink(word)
+        } else {word})
+
+      refinedTextList = refinedTextList.filter(x => !isStopWord(x))
+      refinedTextList = refinedTextList.map(x => stem(x.toLowerCase()))
 
       val pageID = (page \ "id").text.trim.toInt
 
-      // build hashmaps below
-      buildWordFreqMaxCount(pageID, finalStemmedList)
+      // build 3 hashmaps below
+      buildWordFreqMaxCount(pageID, refinedTextList)
 
-      val idSet = toIdSet(matchesLinksList, pageID)
+      val linksList = matchesList.filter(mtch => isLink(mtch))
+
+      val idSet = toIdSet(linksList, pageID)
       idsToLinks.put(pageID, idSet)
     }
   }
 
+  /**
+    * Evaluates whether a match is a link
+    *
+    * @param mtch - a String representing the match
+    * @return true if the match is a link, false otherwise
+    */
+  private def isLink(mtch: String): Boolean = {
+    mtch.matches("""\[\[[^\[]+?\]\]""")
+  }
+
+  /**
+    * Removes double brackets from a link and extracts text of pipe links
+    *
+    * @param link - a String representing the link
+    * @return - the refined link
+    */
+  private def refineLink(link: String): String = {
+    var linkText = link.drop(2).dropRight(2)
+    if (linkText.contains("|")) {
+      linkText = linkText.dropWhile(x => !x.toString.equals("|")).drop(0)
+    }
+    linkText
+  }
+
+  /*
   /**
     * Loops through each link in the matchesLinksList, extracting link text to
     * add to words list by removing page titles in pipe links and surrounding
@@ -104,7 +129,7 @@ class Index(val inputFile: String) {
     * @param matchesLinksList - the list of Strings matched with regexLink
     * @return the list of refined link words
     */
-  def refineLinks(matchesLinksList: List[String]): List[String] = {
+  private def refineLinks(matchesLinksList: List[String]): List[String] = {
     var refinedLinksList = List[String]()
     for (link <- matchesLinksList) {
       var linkText = link
@@ -117,6 +142,7 @@ class Index(val inputFile: String) {
     }
     refinedLinksList
   }
+  */
 
   /**
     * Given a single page and its word list, maps and updates words to document
@@ -129,7 +155,7 @@ class Index(val inputFile: String) {
     * @param words - a List of Strings representing the words to update
     *              frequencies for
     */
-  def buildWordFreqMaxCount(pageID: Int, words: List[String]): Unit = {
+  private def buildWordFreqMaxCount(pageID: Int, words: List[String]): Unit = {
     idToMaxCounts.put(pageID, 1.0)
 
     for (word <- words) {
@@ -151,20 +177,6 @@ class Index(val inputFile: String) {
     }
   }
 
-  /*
-  /**
-    * Maps page IDs to a set of all page IDs linked to by that page
-    */
-  def buildIDsToLinks: Unit = {
-    for (page <- pageSeq) {
-      val pageID = (page \ "id").text.trim.toInt
-      val idSet = toIdSet(matchesLinksList)
-      idSet.filter(id => id != pageID) // remove pageID from set
-      idsToLinks.put(pageID, idSet)
-    }
-  }
-  */
-
   /**
     * Given a list of links within a page, creates a set of corresponding page
     * IDs as long as the link title is part of the corpus
@@ -172,7 +184,7 @@ class Index(val inputFile: String) {
     * @param listOfLinks - the list of links
     * @return a set of page IDs of the unique links
     */
-  def toIdSet(listOfLinks: List[String], pageID: Int): Set[Int] = {
+  private def toIdSet(listOfLinks: List[String], pageID: Int): Set[Int] = {
     var setOfIds: Set[Int] = Set()
 
     for (link <- listOfLinks) {
@@ -194,7 +206,7 @@ class Index(val inputFile: String) {
     * @param kPageID - an Int representing the page ID for page k
     * @return the weight given by k to j
     */
-  def calcWeight(jPageID: Int, kPageID: Int): Double = {
+  private def calcWeight(jPageID: Int, kPageID: Int): Double = {
     val n = idsToLinks.size
     var nk = idsToLinks(kPageID).size
     if (nk == 0) {
@@ -202,7 +214,7 @@ class Index(val inputFile: String) {
     }
 
     val epsilon = 0.15
-    if (idsToLinks(jPageID).contains(kPageID)) {
+    if (idsToLinks(kPageID).contains(jPageID)) {
       epsilon / n + (1 - epsilon) / nk
     } else {
       epsilon / n
@@ -212,7 +224,7 @@ class Index(val inputFile: String) {
   /**
     * Calculates all PageRanks and maps page IDs to PageRanks in idsToPageRanks
     */
-  def buildIdsToPageRanks: Unit = {
+  private def buildIdsToPageRanks: Unit = {
     val n = IDArray.size
 
     val pageWeights = new Array[Array[Double]](n)
@@ -223,7 +235,6 @@ class Index(val inputFile: String) {
 
       var i = 0
       for (k <- IDArray) {
-        // weights :+ calcWeight(j, k)
         weights(i) = calcWeight(j, k)
         i += 1
       }
@@ -233,8 +244,7 @@ class Index(val inputFile: String) {
     }
 
     val ranking = Array.fill[Double](n)(0)
-    val updatedRanking = Array.fill[Double](n)(1.0/n) // fills array with 0.0
-    // instead of 1/n
+    val updatedRanking = Array.fill[Double](n)(1.0/n)
 
     var distance = 1.0
     while (distance > 0.001) {
