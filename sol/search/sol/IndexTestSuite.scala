@@ -2,54 +2,84 @@ package search.sol
 
 import tester.Tester
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{HashMap, Set}
 
-class IndexTestSuite {
+object IndexTestSuite {
+  val testIndex = new Index("sol/search/sol/TestWiki.xml")
 
-//  object Index {
-//    val testIndex = new Index("TestWiki.xml")
-//
-//    def idToTitles: mutable.HashMap[Int, String] = {
-//      testIndex.idsToTitles
-//    }
-//  }
+  /**
+    * Tests buildTitleIdMaps by comparing to expected hashmaps
+    *
+    * @param t - tester
+    */
+  def testBuildTitleIdMaps(t: Tester): Unit = {
+    val expectedIdsToTitles = new HashMap[Int, String]
+    expectedIdsToTitles.put(0, "PageA")
+    expectedIdsToTitles.put(1, "PageB")
+    expectedIdsToTitles.put(2, "PageC")
+    expectedIdsToTitles.put(3, "PageD")
+    t.checkExpect(testIndex.getIdsToTitles, expectedIdsToTitles)
 
-  def indexTester(t: Tester): Unit = {
-    val testIndex = new Index("sol/search/sol/TestWiki.xml")
-
-    val expectedHm1 = new HashMap[Int, String]
-    expectedHm1.put(0, "PageA")
-    expectedHm1.put(1, "PageB")
-    expectedHm1.put(2, "PageC")
-    expectedHm1.put(3, "PageD")
-    // t.checkExpect(testIndex.makeIdsToTitlesHm, expectedHm1)
-
-    val expectedHm2 = new HashMap[String, Int]
-    expectedHm2.put("PageA", 0)
-    expectedHm2.put( "PageB", 1)
-    expectedHm2.put("PageC", 2)
-    expectedHm2.put("PageD", 3)
-    // t.checkExpect(testIndex.makeTitlesToIdsHm, expectedHm2)
-
-//    val expectedHm3 = HashMap()
-//    t.checkExpect(testIndex.mapWordsRelevance, expectedHm3)
-
-//    val expectedHm4 = new HashMap[Int, Double]
-//    expectedHm4.put(0, )
-//    expectedHm4.put(1, )
-//    expectedHm4.put(2, )
-//    expectedHm4.put(3, )
-//    t.checkExpect(testIndex.calcPageRank, expectedHm4)
-
-
-
+    val expectedTitlesToId = new HashMap[String, Int]
+    expectedTitlesToId.put("PageA", 0)
+    expectedTitlesToId.put( "PageB", 1)
+    expectedTitlesToId.put("PageC", 2)
+    expectedTitlesToId.put("PageD", 3)
+    t.checkExpect(testIndex.getTitlesToId, expectedTitlesToId)
   }
 
+  def testBuildWordsLinksMaps(t: Tester): Unit = {
+    val expectedWdToDocFreq = new HashMap[String, HashMap[Int,
+      Double]]
 
+    val expectedIdsToMaxCounts = new HashMap[Int, Double]
 
+    val expectedIdsToLinks = new HashMap[Int, Set[Int]]
+    val aLinks: Set[Int] = Set()
+    aLinks += 1
+    aLinks += 2
+    aLinks += 3
+    val bLinks: Set[Int] = Set()
+    val cLinks: Set[Int] = Set()
+    cLinks += 0
+    cLinks += 3
+    val dLinks: Set[Int] = Set()
+    dLinks += 0
 
+    expectedIdsToLinks.put(0, aLinks)
+    expectedIdsToLinks.put(1, bLinks)
+    expectedIdsToLinks.put(2, cLinks)
+    expectedIdsToLinks.put(3, dLinks)
+    t.checkExpect(testIndex.getTitlesToId, expectedIdsToLinks)
+  }
+
+  // test PageRank
+  System.out.println(testIndex.getIdsToPageRanks)
+
+  /*
+  val pageDocFreq = new HashMap[Int, Double]
+  pageDocFreq.put(0, 1.0)
+  val bDocFreq = new HashMap[Int, Double]
+  bDocFreq.put(0, 1.0)
+  val bodyDocFreq = new HashMap[Int, Double]
+  bodyDocFreq.put(1, 1.0)
+  bodyDocFreq.put(3, 1.0)
+  val textDocFreq = new HashMap[Int, Double]
+  bodyDocFreq.put(1, 1.0)
+  bodyDocFreq.put(3, 1.0)
+  val iDocFreq = new HashMap[Int, Double]
+  bodyDocFreq.put(1, 3.0)
+  val linkDocFreq = new HashMap[Int, Double]
+  linkDocFreq.put(1, 4.0)
+  val anythingDocFreq = new HashMap[Int, Double]
+  anythingDocFreq.put(1, 1.0)
+
+  expectedWdToDocFreq.put("body", bodyDocFreq)
+  expectedWdToDocFreq.put("text!", textDocFreq)
+   */
 }
 
-object IndexTestSuite extends App {
-  Tester.run(new IndexTestSuite)
+object Main extends App {
+  val testIndex = new Index("sol/search/sol/TestWiki.xml")
+  Tester.run(IndexTestSuite)
 }

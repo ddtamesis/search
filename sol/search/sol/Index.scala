@@ -4,8 +4,7 @@ import search.src.PorterStemmer.stem
 import search.src.StopWords.isStopWord
 import tester.Tester
 
-import scala.collection.mutable.Set
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{HashMap, ListBuffer, Set}
 import scala.util.matching.Regex
 import scala.xml.{Node, NodeSeq}
 
@@ -28,7 +27,7 @@ class Index(val inputFile: String) {
 
   private val wordsToDocumentFrequencies = new HashMap[String, HashMap[Int,
     Double]]
-  private val idToMaxCounts = new HashMap[Int, Double]
+  private val idsToMaxCounts = new HashMap[Int, Double]
   private val idsToTitles = new HashMap[Int, String]
   private val titlesToId = new HashMap[String, Int]
   private val idsToLinks = new HashMap[Int, Set[Int]]
@@ -65,7 +64,7 @@ class Index(val inputFile: String) {
 
   /**
     * Maps words to document frequencies (wordsToDocumentFrequencies)
-    * and page IDs to max word frequencies (idToMaxCounts)
+    * and page IDs to max word frequencies (idsToMaxCounts)
     * and page IDs to a set of all page IDs linked to by that page (idsToLinks)
     */
   private def buildWordsLinksMaps: Unit = {
@@ -76,10 +75,7 @@ class Index(val inputFile: String) {
 
       val matchesList = matchesIterator.toList.map { aMatch => aMatch.matched }
 
-      var refinedTextList: List[String] = matchesList.map(word =>
-        if (isLink(word)) {
-          refineLink(word)
-        } else {word})
+      var refinedTextList: List[String] = refineLinksInList(matchesList)
 
       refinedTextList = refinedTextList.filter(x => !isStopWord(x))
       refinedTextList = refinedTextList.map(x => stem(x.toLowerCase()))
@@ -87,7 +83,7 @@ class Index(val inputFile: String) {
       val pageID = (page \ "id").text.trim.toInt
 
       // build 3 hashmaps below
-      buildWordFreqMaxCount(pageID, refinedTextList)
+      buildWordFreqMaxCount(pageID, refinedTextList) // debug this
 
       val linksList = matchesList.filter(mtch => isLink(mtch))
 
@@ -120,34 +116,33 @@ class Index(val inputFile: String) {
     linkText
   }
 
-  /*
   /**
-    * Loops through each link in the matchesLinksList, extracting link text to
-    * add to words list by removing page titles in pipe links and surrounding
-    * brackets
+    * Takes a list of Strings and refines the links in the list by removing
+    * surrounding brackets, extracting the link text for pipe links, and
+    * splitting strings with multiple words into separate strings
     *
-    * @param matchesLinksList - the list of Strings matched with regexLink
-    * @return the list of refined link words
+    * @param lst - a List of Strings representing the text to refine
+    * @return the refined list
     */
-  private def refineLinks(matchesLinksList: List[String]): List[String] = {
-    var refinedLinksList = List[String]()
-    for (link <- matchesLinksList) {
-      var linkText = link
-      if (link.contains("|")) {
-        linkText = link.dropWhile(x => !x.toString.equals("|"))
-      }
-      val wordsInLink : Array[String] = linkText.split("""[\W]""")
+  def refineLinksInList(lst: List[String]): List[String] = {
+    var refinedList = new ListBuffer[String]()
 
-      refinedLinksList = refinedLinksList.appendedAll(wordsInLink)
+    for (str <- lst) {
+      if (isLink(str)) {
+        val refinedLinkText = refineLink(str)
+        val wordsInLink : Array[String] = refinedLinkText.split("""[\W]""")
+        refinedList.addAll(wordsInLink)
+      } else {
+        refinedList += str
+      }
     }
-    refinedLinksList
+    refinedList.toList
   }
-  */
 
   /**
     * Given a single page and its word list, maps and updates words to document
     * frequencies for every word. Also compares updated word
-    * frequencies with the existing max counts in idToMaxCounts and updates
+    * frequencies with the existing max counts in idsToMaxCounts and updates
     * the max count if the updated word frequency is greater.
     *
     * @param pageID - an Int representing the page to add word frequencies
@@ -156,7 +151,7 @@ class Index(val inputFile: String) {
     *              frequencies for
     */
   private def buildWordFreqMaxCount(pageID: Int, words: List[String]): Unit = {
-    idToMaxCounts.put(pageID, 1.0)
+    idsToMaxCounts.put(pageID, 1.0)
 
     for (word <- words) {
       // if word not present, add mapping to HashMap for words.txt
@@ -170,8 +165,8 @@ class Index(val inputFile: String) {
         val incrementedFreq = wordsToDocumentFrequencies(word)(pageID) + 1.0
         wordsToDocumentFrequencies(word).update(pageID, incrementedFreq)
 
-        if (incrementedFreq > idToMaxCounts(pageID)) {
-          idToMaxCounts(pageID) = incrementedFreq
+        if (incrementedFreq > idsToMaxCounts(pageID)) {
+          idsToMaxCounts(pageID) = incrementedFreq
         }
       }
     }
@@ -209,12 +204,14 @@ class Index(val inputFile: String) {
   private def calcWeight(jPageID: Int, kPageID: Int): Double = {
     val n = idsToLinks.size
     var nk = idsToLinks(kPageID).size
+    var hasNoLinks = false
     if (nk == 0) {
       nk = n - 1
+      hasNoLinks = true
     }
 
     val epsilon = 0.15
-    if (idsToLinks(kPageID).contains(jPageID)) {
+    if (idsToLinks(kPageID).contains(jPageID) | hasNoLinks && (jPageID != kPageID)) {
       epsilon / n + (1 - epsilon) / nk
     } else {
       epsilon / n
@@ -271,77 +268,31 @@ class Index(val inputFile: String) {
     }
   }
 
-  object IndexTest {
-    def testBuildIdsToTitles(t: Tester): Unit = {
-      val testIndex = new Index("sol/search/sol/TestWiki.xml")
-
-      val expectedWdToDocFreq = new HashMap[String, HashMap[Int,
-        Double]]
-
-      val pageDocFreq = new HashMap[Int, Double]
-      pageDocFreq.put(0, 1.0)
-      val bDocFreq = new HashMap[Int, Double]
-      bDocFreq.put(0, 1.0)
-      val bodyDocFreq = new HashMap[Int, Double]
-      bodyDocFreq.put(1, 1.0)
-      bodyDocFreq.put(3, 1.0)
-      val textDocFreq = new HashMap[Int, Double]
-      bodyDocFreq.put(1, 1.0)
-      bodyDocFreq.put(3, 1.0)
-      val iDocFreq = new HashMap[Int, Double]
-      bodyDocFreq.put(1, 3.0)
-      val linkDocFreq = new HashMap[Int, Double]
-      linkDocFreq.put(1, 4.0)
-      val anythingDocFreq = new HashMap[Int, Double]
-      anythingDocFreq.put(1, 1.0)
-
-      expectedWdToDocFreq.put("body", bodyDocFreq)
-      expectedWdToDocFreq.put("text!", textDocFreq)
-
-
-      val expectedIdToMaxCounts = new HashMap[Int, Double]
-
-
-      val expectedIdsToTitles = new HashMap[Int, String]
-      expectedIdsToTitles.put(0, "PageA")
-      expectedIdsToTitles.put(1, "PageB")
-      expectedIdsToTitles.put(2, "PageC")
-      expectedIdsToTitles.put(3, "PageD")
-      t.checkExpect(testIndex.idsToTitles, expectedIdsToTitles)
-
-      val expectedTitlesToId = new HashMap[String, Int]
-      expectedTitlesToId.put("PageA", 0)
-      expectedTitlesToId.put( "PageB", 1)
-      expectedTitlesToId.put("PageC", 2)
-      expectedTitlesToId.put("PageD", 3)
-      t.checkExpect(testIndex.titlesToId, expectedTitlesToId)
-
-      val expectedIdsToLinks = new HashMap[Int, Set[Int]]
-      val aLinks: Set[Int] = Set()
-      aLinks += 1
-      aLinks += 2
-      aLinks += 3
-      val bLinks: Set[Int] = Set()
-      val cLinks: Set[Int] = Set()
-      cLinks += 0
-      cLinks += 3
-      val dLinks: Set[Int] = Set()
-      dLinks += 0
-
-      expectedIdsToLinks.put(0, aLinks)
-      expectedIdsToLinks.put(1, bLinks)
-      expectedIdsToLinks.put(2, cLinks)
-      expectedIdsToLinks.put(3, dLinks)
-      t.checkExpect(testIndex.idsToLinks, expectedIdsToLinks)
-
-      val expectedIdsToPageRanks = new HashMap[Int, Double]
-    }
+  def getWordsToDocFreq: HashMap[String, HashMap[Int,
+    Double]] = { // should we make this hashmap immutable to prevent outside
+    // changes?
+    this.wordsToDocumentFrequencies
   }
 
-}
+  def getIdsToMaxCounts: HashMap[Int, Double] = {
+    this.idsToMaxCounts
+  }
 
-object IndexTest extends App {
-  Tester.run(IndexTest)
+  def getIdsToTitles: HashMap[Int, String] = {
+    this.idsToTitles
+  }
+
+  def getTitlesToId: HashMap[String, Int] = {
+    this.titlesToId
+  }
+
+  def getIdsToLinks: HashMap[Int, Set[Int]] = {
+    this.idsToLinks
+  }
+
+  def getIdsToPageRanks: HashMap[Int, Double] = {
+    this.idsToPageRanks
+  }
 }
 
 object Index {
@@ -350,6 +301,7 @@ object Index {
 //    System.out.println(smallWiki.wordsToDocumentFrequencies)
     val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
     System.out.println(pageRankWiki.idsToPageRanks)
+    val testIndex = new Index("sol/search/sol/TestWiki.xml")
 // use FileIO here
   }
 }

@@ -1,17 +1,17 @@
 <xml>
     <page>
-        <title> PageA </title>
+        <title> Page0 </title>
         <id> 0 </id>
         <body>
-            [[PageB|This Is Page B]]
-            [[PageC]]
-            [[PageD]]
-            [[PageD]]
+            [[Page1|This Is Page1]]
+            [[Page2]]
+            [[Page3]]
+            [[Page3]]
         </body>
     </page>
 
     <page>
-        <title> PageB </title>
+        <title> Page1 </title>
         <id> 1 </id>
         <body>
             No links
@@ -21,21 +21,22 @@
     </page>
 
     <page>
-        <title> PageC </title>
+        <title> Page2 </title>
         <id> 2 </id>
         <body>
-            [[Category:PageA]]
-            [[PageD]]
-            Orange orange
+            orange
+            [[Category:Page0]]
+            [[Page3|linkToPage3]]
+            Orange
         </body>
     </page>
 
     <page>
-        <title> PageD </title>
+        <title> Page3 </title>
         <id> 3 </id>
         <body>
-            This is the body text! body body
-            [[Category:PageA]]
+            banana Banana BANaNa
+            [[Category:Page0]]
         </body>
     </page>
 
