@@ -41,11 +41,13 @@ class Index(val inputFile: String) {
   this.buildIDsToLinks
   this.buildIdsToPageRanks
 
+  // make getters, no FileIO
   /*
   TA Questions:
   1) Should we do all the mapping in one master function at once so we only
   loop through pageSeq once? Or break it up into separate functions, looping
   through the pageSeq in each function for each mapping?
+  - Yes, should do 1 master function! (keep in mind the timing though)
   2) Debugging PageRank shows r' array initializes with 0.0 instead of 1/n.
   3) Debugging shows wordsToDocFreq maps empty string. Should we get
    rid of this?
@@ -235,7 +237,7 @@ class Index(val inputFile: String) {
     }
 
     val ranking = Array.fill[Double](n)(0)
-    val updatedRanking = Array.fill[Double](n)(1/n) // fills array with 0.0
+    val updatedRanking = Array.fill[Double](n)(1.0/n) // fills array with 0.0
     // instead of 1/n
 
     var distance = 1.0
@@ -339,7 +341,7 @@ object IndexTest extends App {
 object Index {
   def main(args: Array[String]) {
      val smallWiki = new Index("src/search/src/SmallWiki.xml")
-    System.out.println(smallWiki.wordsToDocumentFrequencies)
+//    System.out.println(smallWiki.wordsToDocumentFrequencies)
     val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
     System.out.println(pageRankWiki.wordsToDocumentFrequencies)
 // use FileIO here
