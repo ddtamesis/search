@@ -14,7 +14,7 @@
         <title> PageB </title>
         <id> 1 </id>
         <body>
-            This is the body text! I don't link to anything!
+            This is the body text! I don't link to anything! link link link
         </body>
     </page>
 
@@ -31,7 +31,7 @@
         <title> PageD </title>
         <id> 3 </id>
         <body>
-            This is the body text!
+            This is the body text! body body
             [[Category:PageA]]
         </body>
     </page>

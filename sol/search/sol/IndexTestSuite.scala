@@ -22,14 +22,14 @@ class IndexTestSuite {
     expectedHm1.put(1, "PageB")
     expectedHm1.put(2, "PageC")
     expectedHm1.put(3, "PageD")
-    t.checkExpect(testIndex.makeIdsToTitlesHm, expectedHm1)
+    // t.checkExpect(testIndex.makeIdsToTitlesHm, expectedHm1)
 
     val expectedHm2 = new HashMap[String, Int]
     expectedHm2.put("PageA", 0)
     expectedHm2.put( "PageB", 1)
     expectedHm2.put("PageC", 2)
     expectedHm2.put("PageD", 3)
-    t.checkExpect(testIndex.makeTitlesToIdsHm, expectedHm2)
+    // t.checkExpect(testIndex.makeTitlesToIdsHm, expectedHm2)
 
 //    val expectedHm3 = HashMap()
 //    t.checkExpect(testIndex.mapWordsRelevance, expectedHm3)
