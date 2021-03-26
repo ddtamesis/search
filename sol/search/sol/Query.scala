@@ -1,7 +1,7 @@
 package search.sol
 
 import search.src.FileIO
-import search.src.PorterStemmer.{stem, stemArray}
+import search.src.PorterStemmer.stemArray
 import search.src.StopWords.isStopWord
 
 import java.io._
@@ -46,7 +46,6 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
       System.out.println("Sorry, there were no results")
     }
 
-      // consider floats for saving space
     else {
       val scoresToIDs = new HashMap[Double, List[Int]]
       val docScores = new Array[Double](idsToTitle.size)
@@ -184,7 +183,3 @@ object Query {
     }
   }
 }
-
-/*
-query main args can't find file
- */

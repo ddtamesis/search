@@ -14,13 +14,9 @@ import scala.xml.{Node, NodeSeq}
  * @param inputFile - the filename of the XML wiki to be indexed
  */
 class Index(val inputFile: String) {
-  // access the main XML node
   private val mainNode: Node = xml.XML.loadFile(inputFile)
-  // select all children w/ tag “page”
   private val pageSeq: NodeSeq = mainNode \ "page"
-  // select all children w/ tag “title”
   private val titleSeq: NodeSeq = mainNode \ "page" \ "title"
-  // select all children w/ tag “id”
   private val idSeq: NodeSeq = mainNode \ "page" \ "id"
 
   private val IDArray = idSeq.map(x => x.text.trim.toInt).toArray
@@ -36,19 +32,6 @@ class Index(val inputFile: String) {
   this.buildTitleIdMaps
   this.buildWordsLinksMaps
   this.buildIdsToPageRanks
-
-  // make getters, no FileIO
-  /*
-  TA Questions:
-  1) Should we do all the mapping in one master function at once so we only
-  loop through pageSeq once? Or break it up into separate functions, looping
-  through the pageSeq in each function for each mapping?
-  - Yes, should do 1 master function! (keep in mind the timing though)
-  2) Debugging PageRank shows r' array initializes with 0.0 instead of 1/n.
-  3) Debugging shows wordsToDocFreq maps empty string. Should we get
-   rid of this?
-  4) Should we be excluding page IDs from the words list of each page?
-   */
 
   /**
     * Maps page IDs to their Titles (Ints to Strings)
@@ -313,11 +296,13 @@ class Index(val inputFile: String) {
 object Index {
   def main(args: Array[String]) {
     val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
-    System.out.println(pageRankWiki.idsToPageRanks)
+//    System.out.println(pageRankWiki.idsToPageRanks)
     val index = new Index(args(0))
     printTitleFile(args(1), index.getIdsToTitles)
     printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
     printWordsFile(args(3), index.getWordsToDocFreq)
-  // should we call parsing functions here instead of inside class?
+    val t1 = System.nanoTime
+    val duration: Double = (System.nanoTime - t1) / 1e9d
+    println("time " + duration)
   }
 }

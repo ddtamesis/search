@@ -1,11 +1,37 @@
 Your README file should include:
 
-Instructions for use, describing how a user would interact with your program.
-A brief overview of your design, including how the pieces of your program fit.
-A description of features you failed to implement, as well as any extra features you implemented.
-A description of any known bugs in your program.
-- none
+INSTRUCTIONS FOR USE (i.e. how a user would interact with your program)
 
+Query is a REPL (Read-Eval-Print Loop) method that prompts the user for input,
+process the input query/text, prints top 10 most relevant pages based on the
+query, and repeats. This is the method that does all of the communication with a
+user, and it will continue processing queries until the user types ':quit' at
+the prompt.
+
+
+DESIGN OVERVIEW (including how the pieces of your program fit)
+
+Our program consists of two programs, an indexer and a querier. First, running
+the indexer preprocesses a corpus (specified by an input file path) and produces
+files with information about which documents are relevant to which words. These
+files include titles.txt, words.txt, and docs.txt. They are then all used by
+the querier to process and print the 10 pages that are most relevant to the
+query in order of relevance.
+
+The querier runs by taking in 3-4 arguments. The first (--pagerank) can be omitted
+depending on whether or not the user wants to receive results that take into
+account the corpus' pageranks. The other 3 arguments are filepaths to the
+files created by the Indexer's preprocessing. Once they query is running, it
+prompts the user to input a query and hit return to search through the corpus,
+returning the names of up to the top 10 most relevant pages. Again, it
+terminates once the user type ':quit' at the prompt.
+
+
+DESCRIPTION OF FEATURES YOU FAILED OT IMPLEMENT, AS WELL AS ANY EXTRA FEATURES
+We implemented all required features, and no extra ones.
+
+DESCRIPTION OF KNOWN BUGS
+None.
 
 DESCRIPTION FOR TESTING
 
@@ -50,10 +76,31 @@ itself is considered as the page linking to nothing, so it was treated as
 linking once to every page except itself (nk = n-1).
 
 II. Query
+We used a variety of pages to test our Query class. We first tested it on the
+small xml file we created, TestWiki.xml, by running the Indexer to create the 3
+txt files in the sol folder, then running query with and without pagerank.
+Once the 'search' line showed up, we tested queries and they returned expected
+results. For example, we searched for:
+- this & punctuation marks: returned no results because they are stop
+    words or invalid entries
+- before orange: returned pages that had the word 'orange' in them as before is
+    not part of the corpus. The ranking are as follows:
+    - words relevance only: 1 Page1, 2 Page2
+    - pagerank applied: 1 Page2, 2 Page1
+    --> Here we saw PageRank at play. When ranking pages by words' relevance
+    only, Page1 became the most relevant page because "orange" appeared in it 3x
+    vs. the 2x in Page2.
 
+    ??? But, since Page1 has no links and more words in it,
+    when quering using PageRank, Page2 became was deemed more authoritative
+    and relevant.
+- Bananas, bananas, BanaNas:
+    - words relevance only: 1 Page3, 2 Page1
+	- pagerank applied: 1 Page3, 2 Page1
+- cereal: 1 Page1
 
-List of the people with whom you collaborated.
+We also run Query with other files such as SmallWiki.xml and MedWiki.xml
 
-Design Check group:
-Coding subgroup:
-
+LIST OF TEAM MEMBERS:
+Coding subgroup: ddtamesis, jwei34
+Design Check group also included: karian, mkim104
