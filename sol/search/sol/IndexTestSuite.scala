@@ -32,8 +32,77 @@ object IndexTestSuite {
     val expectedWdToDocFreq = new HashMap[String, HashMap[Int,
       Double]]
 
+    val bananaDocFreq = HashMap(1 -> 1.0, 3 -> 3.0)
+
+    val orangDocFreq = HashMap(1 -> 3.0, 2 -> 2.0)
+//    new HashMap[Int, Double]
+//    orangDocFreq.put(1, 3.0)
+//    orangDocFreq.put(2, 2.0)
+
+    val linkDocFreq =  HashMap(1 -> 1.0) // new HashMap[Int, Double]
+//    linkDocFreq.put(1, 1.0)
+
+    val categoriDocFreq = HashMap(0 -> 1.0, 2 -> 1.0, 3 -> 1.0)
+//      new HashMap[Int, Double]
+//    categoriDocFreq.put(0, 1.0)
+//    categoriDocFreq.put(2, 1.0)
+//    categoriDocFreq.put(3, 1.0)
+
+    val cerealDocFreq = HashMap(1 -> 1.0)
+//    cerealDocFreq.put(1, 1.0)
+
+    val linktopage3DocFreq = HashMap(2 -> 1.0)
+//      new HashMap[Int, Double]
+//    linktopage3DocFreq.put(2, 1.0)
+
+    val zeroDocFreq = HashMap(0 -> 1.0)
+//      new HashMap[Int, Double]
+//    zeroDocFreq.put(0, 1.0)
+    val oneDocFreq = HashMap(1 -> 1.0)
+//    new HashMap[Int, Double]
+//    oneDocFreq.put(1, 1.0)
+    val twoDocFreq = HashMap(2 -> 1.0)// new HashMap[Int, Double]
+//    twoDocFreq.put(2, 1.0)
+    val threeDocFreq = HashMap(3 -> 1.0) //new HashMap[Int, Double]
+//    threeDocFreq.put(3, 1.0)
+
+    val page0DocFreq = HashMap(0 -> 1.0, 2 -> 1.0, 3 -> 1.0)
+    // new HashMap[Int, Double]
+//    page0DocFreq.put(0, 1.0)
+//    page0DocFreq.put(2, 1.0)
+//    page0DocFreq.put(3, 1.0)
+    val page1DocFreq = HashMap(0 -> 1.0, 1 -> 1.0)
+//new HashMap[Int, Double]
+//    page1DocFreq.put(0, 1.0)
+//    page1DocFreq.put(1, 1.0)
+    val page2DocFreq = HashMap(0 -> 1.0, 12-> 1.0)
+//    new HashMap[Int, Double]
+//    page2DocFreq.put(0, 1.0)
+//    page2DocFreq.put(2, 1.0)
+    val page3DocFreq = HashMap(0 -> 2.0, 3 -> 1.0)
+//    new HashMap[Int, Double]
+//    page3DocFreq.put(0, 2.0)
+//    page3DocFreq.put(3, 1.0)
+
+    expectedWdToDocFreq.put("banana", bananaDocFreq)
+    expectedWdToDocFreq.put("orang", orangDocFreq)
+    expectedWdToDocFreq.put("link", linkDocFreq)
+    expectedWdToDocFreq.put("categori", categoriDocFreq)
+    expectedWdToDocFreq.put("cereal", cerealDocFreq)
+    expectedWdToDocFreq.put("linktopage3", linktopage3DocFreq)
+    expectedWdToDocFreq.put("0", zeroDocFreq)
+    expectedWdToDocFreq.put("1", oneDocFreq)
+    expectedWdToDocFreq.put("2", twoDocFreq)
+    expectedWdToDocFreq.put("3", threeDocFreq)
+    expectedWdToDocFreq.put("page0", page0DocFreq)
+    expectedWdToDocFreq.put("page1", page1DocFreq)
+    expectedWdToDocFreq.put("page2", page2DocFreq)
+    expectedWdToDocFreq.put("page3", page3DocFreq)
+
+    t.checkExpect(testIndex.getWordsToDocFreq, expectedWdToDocFreq)
+
     val expectedIdsToMaxCounts = new HashMap[Int, Double]
-    expectedIdsToMaxCounts.put(0, 1.0)
+    expectedIdsToMaxCounts.put(0, 2.0)
     expectedIdsToMaxCounts.put(1, 3.0)
     expectedIdsToMaxCounts.put(2, 2.0)
     expectedIdsToMaxCounts.put(3, 3.0)
@@ -60,28 +129,6 @@ object IndexTestSuite {
 
   // test PageRank
 //  System.out.println(testIndex.getIdsToPageRanks)
-
-  /*
-  val pageDocFreq = new HashMap[Int, Double]
-  pageDocFreq.put(0, 1.0)
-  val bDocFreq = new HashMap[Int, Double]
-  bDocFreq.put(0, 1.0)
-  val bodyDocFreq = new HashMap[Int, Double]
-  bodyDocFreq.put(1, 1.0)
-  bodyDocFreq.put(3, 1.0)
-  val textDocFreq = new HashMap[Int, Double]
-  bodyDocFreq.put(1, 1.0)
-  bodyDocFreq.put(3, 1.0)
-  val iDocFreq = new HashMap[Int, Double]
-  bodyDocFreq.put(1, 3.0)
-  val linkDocFreq = new HashMap[Int, Double]
-  linkDocFreq.put(1, 4.0)
-  val anythingDocFreq = new HashMap[Int, Double]
-  anythingDocFreq.put(1, 1.0)
-
-  expectedWdToDocFreq.put("body", bodyDocFreq)
-  expectedWdToDocFreq.put("text!", textDocFreq)
-   */
 }
 
 object Main extends App {

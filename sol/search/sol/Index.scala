@@ -110,15 +110,15 @@ class Index(val inputFile: String) {
   private def refineLink(link: String): String = {
     var linkText = link.drop(2).dropRight(2)
     if (linkText.contains("|")) {
-      linkText = linkText.dropWhile(x => !x.toString.equals("|")).drop(0)
+      linkText = linkText.dropWhile(x => !x.toString.equals("|")).drop(1)
     }
     linkText
   }
 
   /**
     * Takes a list of Strings and refines the links in the list by removing
-    * surrounding brackets, extracting the link text for pipe links, and
-    * splitting strings with multiple words into separate strings
+    * surrounding brackets, extracting the link text for pipe links/category
+    * links, and splitting strings with multiple words into separate strings
     *
     * @param lst - a List of Strings representing the text to refine
     * @return the refined list

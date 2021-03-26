@@ -66,7 +66,7 @@
     val page3Hm = new HashMap[Int, Double]]
     page3Hm.put(0, 1.0)
 
-    expectedWordsFreq.put("orange", orangeHm)
+    expectedWordsFreq.put("orang", orangeHm)
     expectedWordsFreq.put("banana", bananaHm)
     expectedWordsFreq.put("cereal", cerealHm)
     expectedWordsFreq.put("Page0", page0Hm)
