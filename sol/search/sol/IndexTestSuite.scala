@@ -33,30 +33,18 @@ object IndexTestSuite {
       Double]]
 
     val bananaDocFreq = HashMap(1 -> 1.0, 3 -> 3.0)
-
     val orangDocFreq = HashMap(1 -> 3.0, 2 -> 2.0)
-
     val linkDocFreq =  HashMap(1 -> 1.0)
-
     val categoriDocFreq = HashMap(0 -> 1.0, 2 -> 1.0, 3 -> 1.0)
-
     val cerealDocFreq = HashMap(1 -> 1.0)
-
     val linktopage3DocFreq = HashMap(2 -> 1.0)
-
     val zeroDocFreq = HashMap(0 -> 1.0)
-
     val oneDocFreq = HashMap(1 -> 1.0)
-
     val twoDocFreq = HashMap(2 -> 1.0)
     val threeDocFreq = HashMap(3 -> 1.0)
-
     val page0DocFreq = HashMap(0 -> 1.0, 2 -> 1.0, 3 -> 1.0)
-
     val page1DocFreq = HashMap(0 -> 1.0, 1 -> 1.0)
-
     val page2DocFreq = HashMap(0 -> 1.0, 12-> 1.0)
-
     val page3DocFreq = HashMap(0 -> 2.0, 3 -> 1.0)
 
     expectedWdToDocFreq.put("banana", bananaDocFreq)
@@ -75,7 +63,7 @@ object IndexTestSuite {
     expectedWdToDocFreq.put("page3", page3DocFreq)
 
     t.checkExpect(testIndex.getWordsToDocFreq, expectedWdToDocFreq)
-    // test element wise (test bananadocfreq)
+    // alternatively: test element wise (test bananadocfreq)
 
     val expectedIdsToMaxCounts = new HashMap[Int, Double]
     expectedIdsToMaxCounts.put(0, 2.0)
@@ -103,11 +91,7 @@ object IndexTestSuite {
     t.checkExpect(testIndex.getIdsToLinks, expectedIdsToLinks)
   }
 
-  // test PageRank
-//  System.out.println(testIndex.getIdsToPageRanks)
   /*
-  document in README ab visual inspection
-
   test calc and other functions in index
    */
 }
