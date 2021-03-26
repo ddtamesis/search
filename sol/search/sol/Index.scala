@@ -295,8 +295,6 @@ class Index(val inputFile: String) {
 
 object Index {
   def main(args: Array[String]) {
-//    val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
-//    System.out.println(pageRankWiki.idsToPageRanks)
     val index = new Index(args(0))
     printTitleFile(args(1), index.getIdsToTitles)
     printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
