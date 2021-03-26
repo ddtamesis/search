@@ -3,24 +3,27 @@ Your README file should include:
 INSTRUCTIONS FOR USE (i.e. how a user would interact with your program)
 
 Query is a REPL (Read-Eval-Print Loop) method that prompts the user for input,
-process the input query/text, prints top 10 most relevant pages based on the
-query, and repeats. This is the method that does all of the communication with a
-user, and it will continue processing queries until the user types ':quit' at
-the prompt.
+processes the input query/text, prints the top 10 most relevant pages based on
+the query, and repeats. Query does all of the communication
+with a user, and it will continue prompting for a query search until the
+user types ':quit' at the prompt. The user may indicate whether or not to
+include PageRank in the calculation of the document scores by adding
+"--pagerank" as the first argument in the main method.
 
 
 DESIGN OVERVIEW (including how the pieces of your program fit)
 
-Our program consists of two programs, an indexer and a querier. First, running
-the indexer preprocesses a corpus (specified by an input file path) and produces
-files with information about which documents are relevant to which words. These
-files include titles.txt, words.txt, and docs.txt. They are then all used by
-the querier to process and print the 10 pages that are most relevant to the
-query in order of relevance.
+Our search program consists of two programs, an indexer and a querier. First,
+running the indexer preprocesses a corpus (specified by an input file path to
+an xml file) and produces text files storing information to be used later by
+the querier in calculating document relevance to queries. These files include
+titles.txt, words.txt,and docs.txt. They are then all read by the querier to
+process and print the 10 pages that are most relevant
+to the query in order of relevance.
 
 The querier runs by taking in 3-4 arguments. The first (--pagerank) can be omitted
 depending on whether or not the user wants to receive results that take into
-account the corpus' pageranks. The other 3 arguments are filepaths to the
+account the documents' PageRanks. The other 3 arguments are filepaths to the
 files created by the Indexer's preprocessing. Once they query is running, it
 prompts the user to input a query and hit return to search through the corpus,
 returning the names of up to the top 10 most relevant pages. Again, it
