@@ -57,9 +57,9 @@ b) PageRank: We tested PageRank using PageRankWiki.xml, where 100 pages all only
 link to page 100, making page 100 overwhelmingly the most authoritative. A page
 is deemed more authoritative when (i) more pages link to it, (ii) the pages that
 link to it are more authoritative, and (iii) the pages that link to it have few
-links to other pages. It is also worth nothing that a page's rank is more
+links to other pages. It is also worth noting that a page's rank is more
 influenced by a page that links to it as the distance (in the number of links
-to get to it) is smaller.
+to get to it) gets smaller.
 
 First, we printed the resulting PageRank hashmap and saw that the ranks were
 reasonable (0.00545 for pages 1-99, and 0.4607 for page 100--all of which sum to
@@ -83,21 +83,27 @@ Once the 'search' line showed up, we tested queries and they returned expected
 results. For example, we searched for:
 - this & punctuation marks: returned no results because they are stop
     words or invalid entries
+- cereal:
+    - 1 Page1: Only 1 appearance in the corpus, so only 1 page title is returned
 - before orange: returned pages that had the word 'orange' in them as before is
     not part of the corpus. The ranking are as follows:
     - words relevance only: 1 Page1, 2 Page2
     - pagerank applied: 1 Page2, 2 Page1
     --> Here we saw PageRank at play. When ranking pages by words' relevance
     only, Page1 became the most relevant page because "orange" appeared in it 3x
-    vs. the 2x in Page2.
-
-    ??? But, since Page1 has no links and more words in it,
-    when quering using PageRank, Page2 became was deemed more authoritative
-    and relevant.
+    vs. the 2x in Page2. But, since Page1 has no pages linking to it and no
+    links itself while Page2 links to 2 authoritative pages (Page0 and Page3),
+    when quering using PageRank, Page2 became deemed as more authoritative
+    and thus relevant than Page1. This example particularly highlights the 4th
+    principle of determining page ranks, which states that a page's rank becomes
+    more influenced by a page that links to it as the distance (# links
+    to get to it) gets smaller.
 - Bananas, bananas, BanaNas:
     - words relevance only: 1 Page3, 2 Page1
 	- pagerank applied: 1 Page3, 2 Page1
-- cereal: 1 Page1
+	--> Since Page 3 has more instances of "banana" AND is more authoritative
+	(it is linked to by 2 pages rather than 0), it is the most relevant page in
+	both query results.
 
 We also run Query with other files such as SmallWiki.xml and MedWiki.xml
 
