@@ -301,5 +301,6 @@ object Index {
     printTitleFile(args(1), index.getIdsToTitles)
     printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
     printWordsFile(args(3), index.getWordsToDocFreq)
+  // should we call parsing functions here instead of inside class?
   }
 }

@@ -1,9 +1,10 @@
 package search.sol
 
+import search.src.FileIO
+import search.src.PorterStemmer.stemArray
+import search.src.StopWords.isStopWord
+
 import java.io._
-
-import search.src.{FileIO}
-
 import scala.collection.mutable.HashMap
 
 /**
@@ -30,15 +31,48 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
   // contain that word
   private val wordsToDocumentFrequencies = new HashMap[String, HashMap[Int, Double]]
 
-
   /**
    * Handles a single query and prints out results
    *
    * @param userQuery - the query text
    */
   private def query(userQuery: String) {
-    // TODO : Fill this in
-    println("Implement query!")
+    val queryArray : Array[String] = userQuery.toLowerCase.split("""[\W]""")
+    stemArray(queryArray) // check piazza about stemming first
+    queryArray.filter(word => !isStopWord(word) && isValidWord(word))
+
+    if (queryArray.isEmpty) {
+      System.out.println("Sorry, there were no results")
+    }
+
+      // consider floats for saving space
+    else {
+      val idToScores = new HashMap[Int, Double]
+      for ((id, title) <- idsToTitle) {
+        var relevanceScore = 0.0
+        for (word <- queryArray) {
+          relevanceScore += calcRelvScore(id, word)
+        }
+        if (usePageRank) {
+          relevanceScore *= idsToPageRank(id)
+        }
+        idToScores.put(id, relevanceScore)
+      }
+      idToScores.toSeq.sortWith(_._2 > _._2):_*
+      val results = idToScores.keys.toArray
+      printResults(results)
+    }
+  }
+
+  private def isValidWord(word: String): Boolean = {
+   wordsToDocumentFrequencies.contains(word)
+  }
+
+  private def calcRelvScore(id: Int, word: String): Double = {
+    val tf = wordsToDocumentFrequencies(word)(id) / idsToMaxFreqs(id)
+    val idf = Math.log(idsToTitle.size / wordsToDocumentFrequencies
+    (word).size)
+    tf * idf
   }
 
   /**
