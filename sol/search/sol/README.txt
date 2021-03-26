@@ -49,3 +49,5 @@ did not link to page j, including special cases where pages link to themselves
 or to pages outside the corpus. Page 100 was a special case where its link to
 itself is considered as the page linking to nothing, so it was treated as
 linking once to every page except itself (nk = n-1).
+
+II. Querier

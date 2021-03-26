@@ -1,7 +1,7 @@
 package search.sol
 
 import search.src.FileIO
-import search.src.PorterStemmer.stemArray
+import search.src.PorterStemmer.{stem, stemArray}
 import search.src.StopWords.isStopWord
 
 import java.io._
@@ -38,8 +38,7 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
    */
   private def query(userQuery: String) {
     val queryArray : Array[String] = userQuery.toLowerCase.split("""[\W]""")
-    stemArray(queryArray) // check piazza about stemming first
-    queryArray.filter(word => !isStopWord(word) && isValidWord(word))
+    queryArray.filter(word => !isStopWord(word) && isValidWord(stem(word)))
 
     if (queryArray.isEmpty) {
       System.out.println("Sorry, there were no results")
@@ -47,7 +46,9 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
 
       // consider floats for saving space
     else {
-      val idToScores = new HashMap[Int, Double]
+      val scoresToIDs = new HashMap[Double, Int]
+      val scores = new Array[Double](idsToTitle.size)
+      var i = 0
       for ((id, title) <- idsToTitle) {
         var relevanceScore = 0.0
         for (word <- queryArray) {
@@ -56,19 +57,39 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
         if (usePageRank) {
           relevanceScore *= idsToPageRank(id)
         }
-        idToScores.put(id, relevanceScore)
+        scores(i) = relevanceScore
+        i += 1
+        scoresToIDs.put(relevanceScore, id)
       }
-      idToScores.toSeq.sortWith(_._2 > _._2):_*
-      val results = idToScores.keys.toArray
+      scores.sortWith((x1, x2) => x1 > x2)
+
+      val results = new Array[Int](Math.min(10, scores.length))
+      for (i <- results.indices) {
+        results(i) = scoresToIDs(scores(i))
+      }
       printResults(results)
     }
   }
 
+  /**
+    * Evaluates whether a word is a valid query, by virtue of being in the
+    * corpus
+    *
+    * @param word - the word to evaluate
+    * @return true if the word is valid, false otherwise
+    */
   private def isValidWord(word: String): Boolean = {
    wordsToDocumentFrequencies.contains(word)
   }
 
-  private def calcRelvScore(id: Int, word: String): Double = {
+  /**
+    * Gets the relevance score of a document to a term i in the query
+    *
+    * @param id - an Int representing the page ID for the document
+    * @param word - a String representing the term i to calculate on
+    * @return the relevance score of the document for the term i
+    */
+  def calcRelvScore(id: Int, word: String): Double = {
     val tf = wordsToDocumentFrequencies(word)(id) / idsToMaxFreqs(id)
     val idf = Math.log(idsToTitle.size / wordsToDocumentFrequencies
     (word).size)
@@ -86,9 +107,9 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
     }
   }
 
-  /*
-   * Reads in the text files.
-   */
+  /**
+    * Reads in the text files.
+    */
   def readFiles(): Unit = {
     FileIO.readTitles(titleIndex, idsToTitle)
     FileIO.readDocuments(documentIndex, idsToMaxFreqs, idsToPageRank)
@@ -153,3 +174,7 @@ object Query {
     }
   }
 }
+
+/*
+query main args can't find file
+ */

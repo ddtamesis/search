@@ -130,8 +130,9 @@ class Index(val inputFile: String) {
     for (str <- lst) {
       if (isLink(str)) {
         val refinedLinkText = refineLink(str)
-        val wordsInLink : Array[String] = refinedLinkText.split("""[\W]""")
-        refinedList.addAll(wordsInLink)
+        val wordsInLink : List[String] = refinedLinkText.split("""[\W]""")
+          .toList
+        refinedList.prependToList(wordsInLink)
       } else {
         refinedList += str
       }
@@ -268,8 +269,24 @@ class Index(val inputFile: String) {
     }
   }
 
+  /*
+  these only make shallow copies, should we make deep copies for these?
+   */
+  /**
+    * Makes a deep copy of wordsToDocumentFrequencies
+    *
+    * @return deep copy of wordsToDocumentFrequencies
+    */
   def getWordsToDocFreq: HashMap[String, HashMap[Int, Double]] = {
-    this.wordsToDocumentFrequencies.clone()
+    val deepCopy = new HashMap[String, HashMap[Int, Double]]
+    for ((k, v) <- this.wordsToDocumentFrequencies) {
+      val vDeepCopy = new HashMap[Int, Double]
+      for ((k1, v1) <- v) {
+        vDeepCopy.put(k1, v1)
+      }
+      deepCopy.put(k, vDeepCopy)
+    }
+    deepCopy
   }
 
   def getIdsToMaxCounts: HashMap[Int, Double] = {
