@@ -1,5 +1,6 @@
 package search.sol
 
+import search.src.FileIO.{printDocumentFile, printTitleFile, printWordsFile}
 import search.src.PorterStemmer.stem
 import search.src.StopWords.isStopWord
 
@@ -294,11 +295,11 @@ class Index(val inputFile: String) {
 
 object Index {
   def main(args: Array[String]) {
-     val smallWiki = new Index("src/search/src/SmallWiki.xml")
-//    System.out.println(smallWiki.wordsToDocumentFrequencies)
     val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
     System.out.println(pageRankWiki.idsToPageRanks)
-    val testIndex = new Index("sol/search/sol/TestWiki.xml")
-// use FileIO here
+    val index = new Index(args(0))
+    printTitleFile(args(1), index.getIdsToTitles)
+    printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
+    printWordsFile(args(3), index.getWordsToDocFreq)
   }
 }
