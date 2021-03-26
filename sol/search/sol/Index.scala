@@ -4,6 +4,7 @@ import search.src.FileIO.{printDocumentFile, printTitleFile, printWordsFile}
 import search.src.PorterStemmer.stem
 import search.src.StopWords.isStopWord
 
+import scala.collection.mutable
 import scala.collection.mutable.{HashMap, ListBuffer, Set}
 import scala.util.matching.Regex
 import scala.xml.{Node, NodeSeq}
@@ -273,28 +274,56 @@ class Index(val inputFile: String) {
   }
 
   def getIdsToMaxCounts: HashMap[Int, Double] = {
-    this.idsToMaxCounts.clone()
+    val deepCopy = new HashMap[Int, Double]
+    for ((k, v) <- this.idsToMaxCounts) {
+      deepCopy.put(k, v)
+      }
+    deepCopy
   }
 
   def getIdsToTitles: HashMap[Int, String] = {
-    this.idsToTitles.clone()
+    val deepCopy = new HashMap[Int, String]
+    for ((k, v) <- this.idsToTitles) {
+      deepCopy.put(k, v)
+    }
+    deepCopy
   }
 
   def getTitlesToId: HashMap[String, Int] = {
-    this.titlesToId.clone()
+    val deepCopy = new HashMap[String, Int]
+    for ((k, v) <- this.titlesToId) {
+      deepCopy.put(k, v)
+    }
+    deepCopy
   }
 
   def getIdsToLinks: HashMap[Int, Set[Int]] = {
-    this.idsToLinks.clone()
+    val deepCopy = new HashMap[Int, Set[Int]]
+    for ((k, v) <- this.idsToLinks) {
+      val vDeepCopy = new mutable.HashSet[Int]
+      // couldn't do set cuz
+      // abstract, this ok??
+      for (linkId <- v) {
+        vDeepCopy + linkId
+      }
+      deepCopy.put(k, vDeepCopy)
+    }
+    deepCopy
   }
 
   def getIdsToPageRanks: HashMap[Int, Double] = {
-    this.idsToPageRanks.clone()
+    val deepCopy = new HashMap[Int, Double]
+    for ((k, v) <- this.idsToPageRanks) {
+      deepCopy.put(k, v)
+    }
+    deepCopy
   }
 }
 
 object Index {
   def main(args: Array[String]) {
+//    val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
+//    System.out.println(pageRankWiki.idsToPageRanks)
     val index = new Index(args(0))
     printTitleFile(args(1), index.getIdsToTitles)
     printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
