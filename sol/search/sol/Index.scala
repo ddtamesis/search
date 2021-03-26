@@ -29,15 +29,15 @@ class Index(val inputFile: String) {
   private val idsToLinks = new HashMap[Int, Set[Int]]
   private val idsToPageRanks = new HashMap[Int, Double]
 
-  this.buildTitleIdMaps
-  this.buildWordsLinksMaps
-  this.buildIdsToPageRanks
+  this.buildTitleIdMaps()
+  this.buildWordsLinksMaps()
+  this.buildIdsToPageRanks()
 
   /**
     * Maps page IDs to their Titles (Ints to Strings)
     * and Titles to their IDs (Strings to Ints)
     */
-  private def buildTitleIdMaps: Unit = {
+  private def buildTitleIdMaps(): Unit = {
     val titleArray = titleSeq.map(x => x.text.trim).toArray
     for (i <- IDArray.indices) {
       idsToTitles.put(IDArray(i), titleArray(i))
@@ -50,7 +50,7 @@ class Index(val inputFile: String) {
     * and page IDs to max word frequencies (idsToMaxCounts)
     * and page IDs to a set of all page IDs linked to by that page (idsToLinks)
     */
-  private def buildWordsLinksMaps: Unit = {
+  private def buildWordsLinksMaps(): Unit = {
     val regex = new Regex("""\[\[[^\[]+?\]\]|[^\W_]+'[^\W_]+|[^\W_]+""")
 
     for (page <- pageSeq) {
@@ -66,7 +66,7 @@ class Index(val inputFile: String) {
       val pageID = (page \ "id").text.trim.toInt
 
       // build 3 hashmaps below
-      buildWordFreqMaxCount(pageID, refinedTextList) // debug this
+      buildWordFreqMaxCount(pageID, refinedTextList)
 
       val linksList = matchesList.filter(mtch => isLink(mtch))
 
@@ -205,8 +205,8 @@ class Index(val inputFile: String) {
   /**
     * Calculates all PageRanks and maps page IDs to PageRanks in idsToPageRanks
     */
-  private def buildIdsToPageRanks: Unit = {
-    val n = IDArray.size
+  private def buildIdsToPageRanks(): Unit = {
+    val n = IDArray.length
 
     val pageWeights = new Array[Array[Double]](n)
 
@@ -295,7 +295,7 @@ class Index(val inputFile: String) {
 
 object Index {
   def main(args: Array[String]) {
-    val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
+//    val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
 //    System.out.println(pageRankWiki.idsToPageRanks)
     val index = new Index(args(0))
     printTitleFile(args(1), index.getIdsToTitles)
