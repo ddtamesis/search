@@ -10,7 +10,25 @@ A list of the people with whom you collaborated.
 
 DESCRIPTION FOR TESTING
 
-a) PageRank: We tested PageRank using PageRankWiki.xml, where 100 pages all only
+I. Indexer: We tested the indexer parsing in IndexTestSuite.scala by creating a
+small TestWiki.xml to have manageable expected hashmaps to create for comparison
+to the actual resulting hashmaps.
+
+a) wordsToDocumentFrequencies
+To test whether our wordsToDocumentFrequencies HashMap was built correctly,
+we manually counted the frequencies of each word in each page in TestWiki.xml.
+We added these to a new HashMap replicating a wordsToDocumentFrequencies
+HashMap,i.e a HashMap[String, HashMap[Int,Double], where each word maps to
+a HashMap where the key is a page IDs and the value is the frequency of the
+word in that page.
+
+We commented our the test in the end because even though each KVPair in the
+output HashMap matched the expected HashMap from our calculations, there were
+some issues in the comparisons due to the way the different HashMaps were
+initialized (e.g. to save space, threshold sizes were 8 rather than 16
+sometimes).
+
+b) PageRank: We tested PageRank using PageRankWiki.xml, where 100 pages all only
 link to page 100, making page 100 overwhelmingly the most authoritative. A page
 is deemed more authoritative when (i) more pages link to it, (ii) the pages that
 link to it are more authoritative, and (iii) the pages that link to it have few
@@ -31,7 +49,3 @@ did not link to page j, including special cases where pages link to themselves
 or to pages outside the corpus. Page 100 was a special case where its link to
 itself is considered as the page linking to nothing, so it was treated as
 linking once to every page except itself (nk = n-1).
-
-b) Indexer: We tested the indexer parsing in IndexTestSuite.scala by creating a
-small TestWiki.xml to have manageable expected hashmaps to create for comparison
-to the actual resulting hashmaps.
