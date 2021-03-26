@@ -4,8 +4,7 @@ Instructions for use, describing how a user would interact with your program.
 A brief overview of your design, including how the pieces of your program fit.
 A description of features you failed to implement, as well as any extra features you implemented.
 A description of any known bugs in your program.
-A description of how you tested your program.
-A list of the people with whom you collaborated.
+- none
 
 
 DESCRIPTION FOR TESTING
@@ -50,4 +49,11 @@ or to pages outside the corpus. Page 100 was a special case where its link to
 itself is considered as the page linking to nothing, so it was treated as
 linking once to every page except itself (nk = n-1).
 
-II. Querier
+II. Query
+
+
+List of the people with whom you collaborated.
+
+Design Check group:
+Coding subgroup:
+

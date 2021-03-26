@@ -37,8 +37,10 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
    * @param userQuery - the query text
    */
   private def query(userQuery: String) {
-    val queryArray : Array[String] = userQuery.toLowerCase.split("""[\W]""")
-    queryArray.filter(word => !isStopWord(word) && isValidWord(stem(word)))
+    var queryArray: Array[String] = userQuery.toLowerCase.split("""[\W]""")
+    queryArray = queryArray.filter(word => !isStopWord(word))
+    queryArray = stemArray(queryArray)
+    queryArray = queryArray.filter(word => isValidWord(word))
 
     if (queryArray.isEmpty) {
       System.out.println("Sorry, there were no results")
@@ -46,28 +48,33 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
 
       // consider floats for saving space
     else {
-      val scoresToIDs = new HashMap[Double, Int]
-      val scores = new Array[Double](idsToTitle.size)
+      val scoresToIDs = new HashMap[Double, List[Int]]
+      val docScores = new Array[Double](idsToTitle.size)
       var i = 0
       for ((id, title) <- idsToTitle) {
-        var relevanceScore = 0.0
+        var docScore = 0.0
         for (word <- queryArray) {
-          relevanceScore += calcRelvScore(id, word)
+          docScore += calcRelvScore(id, word)
         }
         if (usePageRank) {
-          relevanceScore *= idsToPageRank(id)
+          docScore *= idsToPageRank(id)
         }
-        scores(i) = relevanceScore
+        docScores(i) = docScore
         i += 1
-        scoresToIDs.put(relevanceScore, id)
+        if (scoresToIDs.contains(docScore)) {
+          scoresToIDs(docScore) ::= id
+        } else {
+          scoresToIDs.put(docScore, List(id))
+        }
       }
-      scores.sortWith((x1, x2) => x1 > x2)
+      val sortedScores = docScores.sortWith((x1, x2) => x1 > x2)
+      val uniqueNonzeroScores = sortedScores.filter(x => x > 0).distinct
 
-      val results = new Array[Int](Math.min(10, scores.length))
-      for (i <- results.indices) {
-        results(i) = scoresToIDs(scores(i))
+      var results = List[Int]()
+      for (j <- uniqueNonzeroScores.indices) {
+        results = results ::: scoresToIDs(uniqueNonzeroScores(j))
       }
-      printResults(results)
+      printResults(results.toArray)
     }
   }
 
@@ -90,10 +97,13 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
     * @return the relevance score of the document for the term i
     */
   def calcRelvScore(id: Int, word: String): Double = {
-    val tf = wordsToDocumentFrequencies(word)(id) / idsToMaxFreqs(id)
-    val idf = Math.log(idsToTitle.size / wordsToDocumentFrequencies
-    (word).size)
-    tf * idf
+    if (wordsToDocumentFrequencies(word).contains(id)) {
+      val tf = wordsToDocumentFrequencies(word)(id) / idsToMaxFreqs(id)
+      val idf = Math.log10(idsToTitle.size / wordsToDocumentFrequencies(word).size) //Math.log(n / ni)
+      tf * idf
+    } else {
+      0
+    }
   }
 
   /**

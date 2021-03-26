@@ -104,14 +104,25 @@ object SearchTestSuite {
   }
 
   object QueryTest {
-    val query: Query = new Query("src/search/sol/titles.txt",
-      "src/search/sol/docs.txt",
-      "src/search/sol/words.txt", true)
+    val query: Query = new Query("sol/search/sol/titles.txt",
+      "sol/search/sol/docs.txt",
+      "sol/search/sol/words.txt", true)
     query.readFiles()
 
+    /**
+      * Tests calcRelvScore
+      *
+      * @param t - tester
+      */
     def testCalcRelvScore(t: Tester): Unit = {
-      val expectedOrangeRelv = 3 / 3 * Math.log(4 / 2)
+      val expectedOrangeRelv = 3.0 / 3.0 * Math.log10(4.0 / 2.0)
+      val expectedCategoriRelv = 1.0 / 3.0 * Math.log10(4.0 / 2.0)
+      val expectedLinkRelv = 1.0 / 3.0 * Math.log10(4.0 / 1.0)
+
+
       t.checkExpect(query.calcRelvScore(1, "orang"), expectedOrangeRelv)
+      t.checkExpect(query.calcRelvScore(3, "categori"), expectedCategoriRelv)
+      t.checkExpect(query.calcRelvScore(1, "link"), expectedLinkRelv)
     }
   }
 }
