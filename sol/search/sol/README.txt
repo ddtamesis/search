@@ -108,7 +108,20 @@ results. For example, we searched for:
 	(it is linked to by 2 pages rather than 0), it is the most relevant page in
 	both query results.
 
-We also run Query with other files such as SmallWiki.xml and MedWiki.xml
+We also run Query with other files including SmallWiki.xml, MedWiki.xml, and
+BigWiki.xml. Although BigWiki took some time to load when passed into both the
+Index and Query classes, the other files did not take too long to process. Also,
+the actual querying (printing of result after a query was entered) was
+relatively fast, which was a good sign.
+
+When we compared our MedWiki query to the demo, the results we got were
+quite similar for both when we used and when we didn't use pagerank. We started
+out by searching single words such as banana, cereal, and java, and the top 10
+usually returned at least half of the same titles as the demo, though in
+different order. Then, we searched for things such as "best action movies", and
+the results compared similarly to the demo again. It seemed like the more words
+our query had, the more similar its results were to the demo, which makes sense
+because of the increasing specificity.
 
 LIST OF TEAM MEMBERS:
 Coding subgroup: ddtamesis, jwei34
