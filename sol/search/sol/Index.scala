@@ -221,7 +221,6 @@ class Index(val inputFile: String) {
         weights(i) = calcWeight(j, k)
         i += 1
       }
-
       pageWeights(ji) = weights
       ji += 1
     }
@@ -254,9 +253,6 @@ class Index(val inputFile: String) {
     }
   }
 
-  /*
-  these only make shallow copies, should we make deep copies for these?
-   */
   /**
     * Makes a deep copy of wordsToDocumentFrequencies
     *
@@ -274,6 +270,11 @@ class Index(val inputFile: String) {
     deepCopy
   }
 
+  /**
+    * Makes a deep copy of idsToMaxCounts
+    *
+    * @return deep copy of idsToMaxCounts
+    */
   def getIdsToMaxCounts: HashMap[Int, Double] = {
     val deepCopy = new HashMap[Int, Double]
     for ((k, v) <- this.idsToMaxCounts) {
@@ -282,6 +283,11 @@ class Index(val inputFile: String) {
     deepCopy
   }
 
+  /**
+    * Makes a deep copy of idsToTitles
+    *
+    * @return deep copy of idsToTitles
+    */
   def getIdsToTitles: HashMap[Int, String] = {
     val deepCopy = new HashMap[Int, String]
     for ((k, v) <- this.idsToTitles) {
@@ -290,6 +296,11 @@ class Index(val inputFile: String) {
     deepCopy
   }
 
+  /**
+    * Makes a deep copy of titlesToId
+    *
+    * @return deep copy of titlesToId
+    */
   def getTitlesToId: HashMap[String, Int] = {
     val deepCopy = new HashMap[String, Int]
     for ((k, v) <- this.titlesToId) {
@@ -298,12 +309,15 @@ class Index(val inputFile: String) {
     deepCopy
   }
 
+  /**
+    * Makes a deep copy of idsToLinks
+    *
+    * @return deep copy of idsToLinks
+    */
   def getIdsToLinks: HashMap[Int, Set[Int]] = {
     val deepCopy = new HashMap[Int, Set[Int]]
     for ((k, v) <- this.idsToLinks) {
-      val vDeepCopy = new mutable.HashSet[Int]
-      // couldn't do set cuz
-      // abstract, this ok??
+      val vDeepCopy: Set[Int] = Set()
       for (linkId <- v) {
         vDeepCopy + linkId
       }
@@ -312,6 +326,11 @@ class Index(val inputFile: String) {
     deepCopy
   }
 
+  /**
+    * Makes a deep copy of idsToPageRanks
+    *
+    * @return deep copy of idsToPageRanks
+    */
   def getIdsToPageRanks: HashMap[Int, Double] = {
     val deepCopy = new HashMap[Int, Double]
     for ((k, v) <- this.idsToPageRanks) {
@@ -326,13 +345,13 @@ object Index {
 //    val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
 //    System.out.println(pageRankWiki.idsToPageRanks)
     try {
-    val index = new Index(args(0))
-    printTitleFile(args(1), index.getIdsToTitles)
-    printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
-    printWordsFile(args(3), index.getWordsToDocFreq)
-    val t1 = System.nanoTime
-    val duration: Double = (System.nanoTime - t1) / 1e9d
-    println("time " + duration)
+      val index = new Index(args(0))
+      printTitleFile(args(1), index.getIdsToTitles)
+      printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
+      printWordsFile(args(3), index.getWordsToDocFreq)
+      val t1 = System.nanoTime
+      val duration: Double = (System.nanoTime - t1) / 1e9d
+      println("time " + duration)
     } catch {
       case _: FileNotFoundException =>
         println("One (or more) of the files were not found")
