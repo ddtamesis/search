@@ -4,6 +4,7 @@ import search.src.FileIO.{printDocumentFile, printTitleFile, printWordsFile}
 import search.src.PorterStemmer.stem
 import search.src.StopWords.isStopWord
 
+import java.io.{FileNotFoundException, IOException}
 import scala.collection.mutable
 import scala.collection.mutable.{HashMap, ListBuffer, Set}
 import scala.util.matching.Regex
@@ -324,6 +325,7 @@ object Index {
   def main(args: Array[String]) {
 //    val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
 //    System.out.println(pageRankWiki.idsToPageRanks)
+    try {
     val index = new Index(args(0))
     printTitleFile(args(1), index.getIdsToTitles)
     printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
@@ -331,5 +333,10 @@ object Index {
     val t1 = System.nanoTime
     val duration: Double = (System.nanoTime - t1) / 1e9d
     println("time " + duration)
+    } catch {
+      case _: FileNotFoundException =>
+        println("One (or more) of the files were not found")
+      case _: IOException => println("Error: IO Exception")
+    }
   }
 }
