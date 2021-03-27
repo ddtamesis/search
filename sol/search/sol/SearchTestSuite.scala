@@ -98,9 +98,6 @@ object SearchTestSuite {
       expectedIdsToLinks.put(3, dLinks)
       t.checkExpect(testWiki.getIdsToLinks, expectedIdsToLinks)
     }
-    /*
-  test calc and other functions in index
-   */
   }
 
   object QueryTest {

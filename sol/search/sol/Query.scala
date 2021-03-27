@@ -45,7 +45,6 @@ class Query(titleIndex: String, documentIndex: String, wordIndex: String,
     if (queryArray.isEmpty) {
       System.out.println("Sorry, there were no results")
     }
-
     else {
       val scoresToIDs = new HashMap[Double, List[Int]]
       val docScores = new Array[Double](idsToTitle.size)

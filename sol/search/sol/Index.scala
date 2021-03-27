@@ -342,20 +342,27 @@ class Index(val inputFile: String) {
 
 object Index {
   def main(args: Array[String]) {
-//    val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
-//    System.out.println(pageRankWiki.idsToPageRanks)
-    try {
-      val index = new Index(args(0))
-      printTitleFile(args(1), index.getIdsToTitles)
-      printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
-      printWordsFile(args(3), index.getWordsToDocFreq)
-      val t1 = System.nanoTime
-      val duration: Double = (System.nanoTime - t1) / 1e9d
-      println("time " + duration)
-    } catch {
-      case _: FileNotFoundException =>
-        println("One (or more) of the files were not found")
-      case _: IOException => println("Error: IO Exception")
+    // testing PageRank visually
+    //    val pageRankWiki = new Index("src/search/src/PageRankWiki.xml")
+    //    System.out.println(pageRankWiki.idsToPageRanks)
+    if (args.size != 4) {
+      println("Incorrect arguments. Please use <file path> <titleIndex> "
+        + "<documentIndex> <wordIndex>")
+      System.exit(1)
+    } else {
+      try {
+        val index = new Index(args(0))
+        printTitleFile(args(1), index.getIdsToTitles)
+        printDocumentFile(args(2), index.getIdsToMaxCounts, index.getIdsToPageRanks)
+        printWordsFile(args(3), index.getWordsToDocFreq)
+        val t1 = System.nanoTime
+        val duration: Double = (System.nanoTime - t1) / 1e9d
+        println("time " + duration)
+      } catch {
+        case _: FileNotFoundException =>
+          println("One (or more) of the files were not found")
+        case _: IOException => println("Error: IO Exception")
+      }
     }
   }
 }
